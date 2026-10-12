@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
-  "revision": 266,
-  "updated_at": "2026-09-24T05:52:23Z",
+  "revision": 284,
+  "updated_at": "2026-09-30T06:49:39Z",
   "viewport": {
-    "zoom": 0.514,
-    "cx": 472.0,
-    "cy": 413.0
+    "zoom": 0.473,
+    "cx": 141.0,
+    "cy": 293.0
   },
   "groups": {},
   "nodes": {
@@ -80,13 +80,13 @@
       "anchor": null
     },
     "多层感知机": {
-      "x": 792.0,
-      "y": 192.0,
+      "x": -528.0,
+      "y": 512.0,
       "w": 196.0,
       "h": 64.0,
       "group": null,
-      "state": "ghost",
-      "placedAt": null,
+      "state": "final",
+      "placedAt": "2026-09-30",
       "anchor": null
     },
     "反向传播": {
@@ -170,8 +170,8 @@
       "anchor": null
     },
     "Transformer": {
-      "x": 8.0,
-      "y": 496.0,
+      "x": -184.0,
+      "y": 448.0,
       "w": 196.0,
       "h": 64.0,
       "group": null,
@@ -337,16 +337,6 @@
       "group": null,
       "state": "final",
       "placedAt": "2026-09-18",
-      "anchor": null
-    },
-    "DeepSeek-V3": {
-      "x": -872.0,
-      "y": 704.0,
-      "w": 176.0,
-      "h": 52.0,
-      "group": null,
-      "state": "final",
-      "placedAt": "2026-09-21",
       "anchor": null
     },
     "Engram": {

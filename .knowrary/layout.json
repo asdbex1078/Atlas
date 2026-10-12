@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
-  "revision": 191,
-  "updated_at": "2026-09-23T13:14:45Z",
+  "revision": 296,
+  "updated_at": "2026-09-30T07:10:22Z",
   "viewport": {
-    "zoom": 0.8,
-    "cx": 1911.0,
-    "cy": -95.0
+    "zoom": 0.05,
+    "cx": 629.0,
+    "cy": 2123.0
   },
   "groups": {
     "g-Agent": {
@@ -16,7 +16,7 @@
       "h": 596.0,
       "parent": null,
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": "#eef2f8",
       "doc": null
     },
@@ -28,7 +28,7 @@
       "h": 528.0,
       "parent": "g-Agent",
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": null,
       "doc": null
     },
@@ -40,7 +40,7 @@
       "h": 1752.0,
       "parent": null,
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": "#eef2f8",
       "doc": null
     },
@@ -124,7 +124,7 @@
       "h": 1104.0,
       "parent": null,
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": "#eef2f8",
       "doc": null
     },
@@ -136,25 +136,25 @@
       "h": 228.0,
       "parent": "g-AI",
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": null,
       "doc": null
     },
     "g-AI--体系结构": {
       "name": "体系结构",
-      "x": 538.0,
-      "y": -172.0,
+      "x": 744.0,
+      "y": 24.0,
       "w": 248.0,
       "h": 128.0,
       "parent": "g-AI",
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": null,
       "doc": null
     },
     "g-AI--系统软件": {
       "name": "系统软件",
-      "x": 866.0,
+      "x": 1250.0,
       "y": -172.0,
       "w": 488.0,
       "h": 228.0,
@@ -166,8 +166,8 @@
     },
     "g-AI--AI应用": {
       "name": "AI应用",
-      "x": 1434.0,
-      "y": -172.0,
+      "x": 1386.0,
+      "y": 46.0,
       "w": 504.0,
       "h": 836.0,
       "parent": "g-AI",
@@ -184,7 +184,7 @@
       "h": 768.0,
       "parent": "g-AI",
       "collapsed": false,
-      "pinned": null,
+      "pinned": "collapsed",
       "color": null,
       "doc": null
     },
@@ -834,7 +834,7 @@
     },
     "程序": {
       "x": 288.0,
-      "y": 2260.0,
+      "y": 2264.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-计算机系统--系统软件",
@@ -943,8 +943,8 @@
       "anchor": null
     },
     "内存墙": {
-      "x": 562.0,
-      "y": -128.0,
+      "x": 768.0,
+      "y": 68.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--体系结构",
@@ -953,7 +953,7 @@
       "anchor": null
     },
     "CUDA": {
-      "x": 890.0,
+      "x": 1274.0,
       "y": -128.0,
       "w": 196.0,
       "h": 64.0,
@@ -963,7 +963,7 @@
       "anchor": null
     },
     "KV-Cache": {
-      "x": 1130.0,
+      "x": 1514.0,
       "y": -128.0,
       "w": 196.0,
       "h": 64.0,
@@ -973,8 +973,8 @@
       "anchor": null
     },
     "GQA": {
-      "x": 1458.0,
-      "y": -124.0,
+      "x": 1410.0,
+      "y": 94.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -983,8 +983,8 @@
       "anchor": null
     },
     "MLA": {
-      "x": 1698.0,
-      "y": -124.0,
+      "x": 1650.0,
+      "y": 94.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -993,8 +993,8 @@
       "anchor": null
     },
     "MQA": {
-      "x": 1458.0,
-      "y": -28.0,
+      "x": 1410.0,
+      "y": 190.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1003,8 +1003,8 @@
       "anchor": null
     },
     "Transformer": {
-      "x": 1698.0,
-      "y": -28.0,
+      "x": 1650.0,
+      "y": 190.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1013,7 +1013,7 @@
       "anchor": null
     },
     "Prompt-Caching": {
-      "x": 1152.0,
+      "x": 1536.0,
       "y": -20.0,
       "w": 196.0,
       "h": 64.0,
@@ -1023,8 +1023,8 @@
       "anchor": "KV-Cache"
     },
     "MHA": {
-      "x": 1718.0,
-      "y": 67.0,
+      "x": 1670.0,
+      "y": 285.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1263,8 +1263,8 @@
       "anchor": "RISC"
     },
     "专家系统": {
-      "x": 1458.0,
-      "y": 568.0,
+      "x": 1410.0,
+      "y": 786.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1283,8 +1283,8 @@
       "anchor": "专家系统"
     },
     "AlexNet": {
-      "x": 1633.0,
-      "y": 365.0,
+      "x": 1585.0,
+      "y": 583.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1303,8 +1303,8 @@
       "anchor": "Perceptrons"
     },
     "BERT": {
-      "x": 1488.0,
-      "y": 79.0,
+      "x": 1440.0,
+      "y": 297.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1313,8 +1313,8 @@
       "anchor": "Transformer"
     },
     "CTC": {
-      "x": 1481.0,
-      "y": 160.0,
+      "x": 1433.0,
+      "y": 378.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1323,8 +1323,8 @@
       "anchor": null
     },
     "ResNet": {
-      "x": 1728.0,
-      "y": 450.0,
+      "x": 1680.0,
+      "y": 668.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1333,8 +1333,8 @@
       "anchor": "AlexNet"
     },
     "SIFT": {
-      "x": 1512.0,
-      "y": 473.0,
+      "x": 1464.0,
+      "y": 691.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1343,8 +1343,8 @@
       "anchor": "AlexNet"
     },
     "ViT": {
-      "x": 1734.0,
-      "y": 180.0,
+      "x": 1686.0,
+      "y": 398.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1353,8 +1353,8 @@
       "anchor": "Transformer"
     },
     "Whisper": {
-      "x": 1717.0,
-      "y": 280.0,
+      "x": 1669.0,
+      "y": 498.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1363,8 +1363,8 @@
       "anchor": "CTC"
     },
     "word2vec": {
-      "x": 1674.0,
-      "y": 556.0,
+      "x": 1626.0,
+      "y": 774.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
@@ -1373,8 +1373,8 @@
       "anchor": null
     },
     "注意力机制": {
-      "x": 1486.0,
-      "y": 279.0,
+      "x": 1438.0,
+      "y": 497.0,
       "w": 196.0,
       "h": 64.0,
       "group": "g-AI--AI应用",
