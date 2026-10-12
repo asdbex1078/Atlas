@@ -11,6 +11,7 @@ tags:
   - 教学
 desc: 斯坦福 Hennessy 团队做的 RISC，五级流水线的教科书原型；商业上退场，教学上长青
 layer: 体系结构
+流派: ["[[RISC]]"]
 ---
 # MIPS
 
@@ -34,5 +35,7 @@ layer: 体系结构
 - 延迟槽（delay slot）——一个被后来公认是错误的设计
 - Hennessy & Patterson《计算机体系结构：量化研究方法》
 
+## 归属
+- RISC：RISC 的教科书原型
+
 ## 关系
-- 属于:: [[RISC]] — RISC 的教科书原型

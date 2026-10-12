@@ -10,6 +10,7 @@ tags:
   - Transformer
 desc: 双向 Transformer 编码器 + 掩码语言模型预训练；「预训练 + 微调」成为 NLP 标准范式
 layer: AI应用
+领域线: ["[[NLP]]"]
 ---
 # BERT
 
@@ -34,5 +35,4 @@ layer: AI应用
 - 为什么后来是生成式赢了
 
 ## 关系
-- 属于:: [[NLP]]
 - 源自:: [[Transformer]] (2018) — 只取编码器那一半，加掩码预训练

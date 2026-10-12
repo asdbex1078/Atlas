@@ -11,6 +11,7 @@ tags:
   - Apple Silicon
 desc: Acorn 做的 RISC 指令集；靠低功耗和 IP 授权模式吃下移动端，近年反攻服务器与桌面
 layer: 体系结构
+流派: ["[[RISC]]"]
 ---
 # ARM
 
@@ -34,6 +35,8 @@ layer: 体系结构
 - big.LITTLE 异构核
 - Apple Silicon 的统一内存架构
 
+## 归属
+- RISC：把 RISC 带进移动端
+
 ## 关系
-- 属于:: [[RISC]] — 把 RISC 带进移动端
 - 对比:: [[x86]] — 定长 vs 变长编码、IP 授权 vs 封闭、低功耗起家 vs 性能起家
