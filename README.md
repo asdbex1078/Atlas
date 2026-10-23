@@ -1,4 +1,4 @@
-# HunDun
+# Atlas
 
 一个 **Knowrary 知识库（vault）**：只有数据，没有程序。这里放的是我自己的学习笔记与认知图谱——
 计算机系统、编译、AI / Agent 这几条线，一个知识点一个 md，节点之间用带类型的关系连起来。
@@ -9,11 +9,11 @@
 ## 怎么用
 
 ```bash
-git clone https://github.com/asdbex1078/HunDun.git
+git clone https://github.com/asdbex1078/Atlas.git
 git clone https://github.com/asdbex1078/Knowrary.git && cd Knowrary
 python3 -m venv .venv && .venv/bin/pip install -r server/requirements.txt
 ./server/dev.sh
-# 浏览器里打开 http://127.0.0.1:8765/ ，「设置 → 知识库」选中刚才 clone 的 HunDun 目录
+# 浏览器里打开 http://127.0.0.1:8765/ ，「设置 → 知识库」选中刚才 clone 的 Atlas 目录
 ```
 
 也可以用 Obsidian 直接打开本目录——它本来就是一个 vault。
