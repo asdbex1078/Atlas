@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "revision": 28,
+  "revision": 29,
   "updated_at": "2026-09-24T05:49:09Z",
   "projects": {
     "transformer": {
@@ -488,14 +488,6 @@
                 {
                   "id": "ELF安全机制",
                   "name": "ELF安全机制",
-                  "why": "聊出来的",
-                  "load": "中",
-                  "layer": "",
-                  "year": null
-                },
-                {
-                  "id": "数据库C扩展加载",
-                  "name": "数据库C扩展加载",
                   "why": "聊出来的",
                   "load": "中",
                   "layer": "",

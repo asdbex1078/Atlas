@@ -15,7 +15,7 @@ tags:
 desc: execve 时内核读 ELF 头和程序头表，把每个 PT_LOAD 映射进虚拟内存、多出的部分清零、设权限，加载 PT_INTERP 指定的动态链接器并构建带 auxv 的用户栈，再把控制权交出去
 learned: 2026-09-24
 sources:
-  - ELF
+  - "[[articles/计算机系统/ELF]]"
 ---
 # ELF 加载过程（execve）
 

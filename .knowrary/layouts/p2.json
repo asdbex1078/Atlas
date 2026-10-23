@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "revision": 19,
+  "revision": 20,
   "updated_at": "2026-09-30T06:51:16Z",
   "viewport": {
     "zoom": 0.7,
@@ -71,16 +71,6 @@
     },
     "ELF安全机制": {
       "x": 80.0,
-      "y": 256.0,
-      "w": 176.0,
-      "h": 52.0,
-      "group": null,
-      "state": "final",
-      "placedAt": "2026-09-24",
-      "anchor": null
-    },
-    "数据库C扩展加载": {
-      "x": 300.0,
       "y": 256.0,
       "w": 176.0,
       "h": 52.0,

@@ -14,7 +14,7 @@ tags:
 desc: Unix/Linux 最核心的二进制容器格式：目标文件、可执行文件、共享库、core dump、内核模块、eBPF 对象都用它；核心设计是链接视图（节）与执行视图（段）分离
 learned: 2026-09-24
 sources:
-  - ELF
+  - "[[articles/计算机系统/ELF]]"
 ---
 # ELF（可执行与可链接格式）
 
@@ -26,14 +26,7 @@ ELF（Executable and Linkable Format，可执行与可链接格式）是 Unix/Li
 
 ## 核心内容
 
-### 来源与支持范围
-
-ELF 源自 System V ABI，后来由 TIS（Tool Interface Standard）标准化。它支持：
-
-- 32 位 / 64 位
-- 小端 / 大端
-- 多种 CPU 架构：x86、x86-64、ARM、AArch64、RISC-V、MIPS、PowerPC 等
-- 多种文件类型：目标文件、可执行文件、共享库、core dump
+（全景——ELF 用在哪些地方、对操作系统和 CSAPP 学习的启发、实践工具清单——见原文概述 `articles/计算机系统/ELF.md`，按阅读顺序串起了 ELF 这一组点。）
 
 ### 核心设计：两种视图
 
@@ -78,73 +71,28 @@ ELF 头位于文件开头，关键字段：
 
 注意：现代 Linux 的可执行文件通常是 `ET_DYN`，也就是 PIE，为了支持 ASLR（见 [[ELF安全机制]]）。
 
-### 用在哪里
+## 例子
 
-1. 可执行文件：`/bin/ls`、`/usr/bin/python`
-2. 共享库：`libc.so.6`、`libssl.so`、`libstdc++.so`
-3. 目标文件：`.o`，编译器（[[汇编器]]）输出、链接器输入
-4. 静态库：`.a` 是 `ar` 归档，里面装多个 `.o`
-5. 核心转储：`core` 文件，内存快照 + note，用于事后调试
-6. 内核模块：Linux `.ko`，模块加载器解析符号和重定位
-7. 内核镜像：`vmlinux` 是 ELF，`bzImage` 是压缩引导镜像
-8. Android Native 库：`.so`
-9. [[eBPF]] 对象：BPF 程序编译为 ELF，由 libbpf 加载
-10. [[JIT]] 目标文件：LLVM ORC、MCJIT 可生成 ELF 对象并加载——ELF 在这里是「运行时生成的代码容器」
-11. 数据库插件：PostgreSQL、MySQL、SQLite 扩展动态库（见 [[数据库C扩展加载]]）
-12. 调试符号文件：`.debug`、build-id 对应文件
-13. 容器镜像里的二进制：几乎全是 ELF
-14. 嵌入式与 RTOS：很多嵌入式 Linux、QNX、VxWorks
-
-### 对操作系统的启发
-
-1. **统一加载接口**：内核只实现一个 ELF 加载器，就能支持可执行文件、共享库、PIE、core
-2. **链接与加载分离**：编译时生成可重定位信息，加载时由动态链接器完成地址绑定
-3. **虚拟内存映射**：`PT_LOAD` 直接映射到虚拟地址，支持按需分页、写时复制、mmap
-4. **动态链接器用户态化**：内核只负责加载解释器，复杂的符号解析放在用户态
-5. **进程启动模型**：`fork` + `execve`，`execve` 替换地址空间
-6. **模块化**：内核模块 `.ko` 用 ELF，支持动态加载、符号导出、重定位
-7. **安全机制**：PIE、ASLR、NX、RELRO、CET 都依赖 ELF 元数据
-8. **核心转储**：core 是 ELF
-9. **可扩展性**：节/段类型、NOTE、GNU 扩展让格式持续演进
-10. **ABI 稳定性**：符号版本、SONAME、动态标签支撑长期二进制兼容
-
-### 对 CSAPP 学习的启发
-
-CSAPP 第 7 章「链接」和第 9 章「虚拟内存」几乎就是 ELF 的教科书：
-
-- **第 7 章 链接**：`.c` → `.s` → `.o` → 可执行文件；`ET_REL` 目标文件、符号表、重定位；静态/动态链接、共享库；GOT/PLT、位置无关代码；库打桩、LD_PRELOAD
-- **第 9 章 虚拟内存**：ELF 段映射到虚拟地址；`mmap`、按需分页、写时复制；加载器怎么把可执行文件变成进程
-- **第 8 章 异常控制流**：`fork`、`execve`、进程上下文
-- **第 3 章 机器级表示**：`.text` 里的机器码、汇编、反汇编
-- **第 5 章 优化**：PIC 开销、内联、符号可见性
-- **安全实验**：Attack Lab 的缓冲区溢出、NX、ASLR、RELRO 都和 ELF 权限与布局有关
-
-作者原话：读懂 ELF，CSAPP 的链接、加载、虚拟内存、动态库章节会从「概念」变成「可验证的工程现实」。
-
-### 实践工具
+（补充）同一个 hello world，用 `readelf -h` 看 ELF 头，PIE 和非 PIE 的差别就在 `e_type` 上：
 
 ```sh
-file a.out
-readelf -h a.out          # ELF 头
-readelf -l a.out          # 程序头 / 段
-readelf -S a.out          # 节头 / 节
-readelf -s a.out          # 符号表
-readelf -d a.out          # 动态段
-readelf -r a.out          # 重定位
-objdump -d a.out          # 反汇编
-objdump -t a.out          # 符号表
-objdump -s -j .rodata a.out
-nm a.out
-ldd a.out
-patchelf --print-interpreter a.out
-strip a.out
-gdb a.out
-cat /proc/$(pidof a.out)/maps
-LD_DEBUG=libs ./a.out
-LD_PRELOAD=./hook.so ./a.out
+$ gcc hello.c -o hello_pie                # 现代发行版默认就是 PIE
+$ readelf -h hello_pie | grep -E 'Magic|Class|Type|Entry'
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Type:                              DYN (Position-Independent Executable file)
+  Entry point address:               0x1060
+
+$ gcc -no-pie hello.c -o hello_nopie
+$ readelf -h hello_nopie | grep Type
+  Type:                              EXEC (Executable file)
 ```
 
-这些工具能把 ELF 的节、段、符号、重定位一一对应起来。
+（补充）怎么读：
+
+- `Magic` 开头 4 个字节 `7f 45 4c 46` 就是 `0x7F 'E' 'L' 'F'`；第 5 个字节 `02` 表示 64 位（`e_ident[EI_CLASS]`），第 6 个 `01` 表示小端。
+- PIE 是 `ET_DYN`，入口地址 `0x1060` 很小——它是相对加载基址的偏移，真正的地址要等 ASLR 选好基址才定（见 [[ELF安全机制]]）；较老的 binutils 会把它显示成 `DYN (Shared object file)`，`file` 命令则显示 `pie executable`。
+- 非 PIE 是 `ET_EXEC`，入口地址是 `0x401xxx` 这样的固定虚拟地址，加载器照这个地址映射（见 [[ELF加载过程]]）。
 
 ## 参考资料
 

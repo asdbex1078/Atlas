@@ -19,7 +19,7 @@ tags:
 desc: PIE+ASLR 随机基址、GNU_STACK 不可执行栈、RELRO 重定位后 GOT 只读、BIND_NOW 缩短 GOT 可写窗口、CET 控制流保护——全都靠 ELF 元数据表达
 learned: 2026-09-24
 sources:
-  - ELF
+  - "[[articles/计算机系统/ELF]]"
 ---
 # ELF 安全机制（PIE/ASLR/NX/RELRO）
 

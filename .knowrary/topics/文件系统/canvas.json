@@ -1,0 +1,49 @@
+{
+  "schema_version": 2,
+  "revision": 36,
+  "updated_at": "2026-10-13T11:55:51Z",
+  "viewport": {
+    "zoom": 1.0,
+    "cx": -236.0,
+    "cy": -285.0
+  },
+  "groups": {},
+  "nodes": {},
+  "refs": [],
+  "notes": [],
+  "images": [],
+  "edges": {},
+  "shapes": {
+    "smv6mixuq7eh": {
+      "kind": "frame",
+      "x": -528.0,
+      "y": -216.0,
+      "w": 560.0,
+      "h": 240.0,
+      "text": "linux 0.12",
+      "tip": "linux 0.12",
+      "parent": null,
+      "node": null,
+      "style": {
+        "fill": "blue",
+        "stroke": null,
+        "color": null,
+        "size": null,
+        "bold": null
+      }
+    },
+    "smv6mjwhem03": {
+      "kind": "text",
+      "x": -457.0,
+      "y": -476.0,
+      "w": 160.0,
+      "h": 32.0,
+      "text": "",
+      "tip": "",
+      "parent": null,
+      "node": null,
+      "style": null
+    }
+  },
+  "links": {}
+}

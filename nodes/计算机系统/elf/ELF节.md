@@ -14,7 +14,7 @@ tags:
 desc: "ELF 按「节」划分的链接视图：.text/.data/.bss/.rodata 装代码数据，.symtab/.rela.* 服务链接，.dynamic/.got/.plt 服务动态链接；给链接器、调试器看，可被 strip"
 learned: 2026-09-24
 sources:
-  - ELF
+  - "[[articles/计算机系统/ELF]]"
 ---
 # ELF 节（Section）：链接视图
 

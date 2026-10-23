@@ -15,7 +15,7 @@ tags:
 desc: ELF 按「段」划分的执行视图：程序头表里的 PT_LOAD 等条目告诉内核把文件哪部分以什么权限映射到哪个虚拟地址；p_filesz < p_memsz 的差额就是清零的 .bss
 learned: 2026-09-24
 sources:
-  - ELF
+  - "[[articles/计算机系统/ELF]]"
 ---
 # ELF 段（Segment）：执行视图
 
