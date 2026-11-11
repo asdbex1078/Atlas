@@ -1,0 +1,1822 @@
+<title>计算机与人工智能知识树</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 双树同根。底部图灵做根，左=计算机树、右=AI树，自下而上长。年份生长 + 点枝收展。SVG 画树干枝桠 */
+:root{
+  color-scheme: light;
+  --bg:#f3efe6; --ink:#2a2f3a; --dim:#5f6b7a; --faint:#9aa6b4;
+  --soil:#e9ddc7; --soil2:#dcc9a8; --soil-line:#c9b48c;
+  --bark:#9c6b3f; --bark2:#b98a5a; --leaf:#7fb069;
+  --blue:#2f6cb0; --blueBox:#dbe8f7; --blueEdge:#aecbea;
+  --green:#3f8f52; --greenBox:#dcecd6; --greenEdge:#b4d7ad;
+  --purple:#7b6bb0; --purpleBox:#e5def2; --purpleEdge:#c7bbe4;
+  --root:#8a5a33;
+  --serif:"Songti SC","STSong","Noto Serif SC",Georgia,serif;
+  --sans:"PingFang SC",-apple-system,"Helvetica Neue","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:radial-gradient(120% 80% at 50% 0%, #f7f3ea 0%, #f1ece1 60%, #ece3d2 100%);
+  color:var(--ink);font-family:var(--sans);line-height:1.35;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1560px;margin:0 auto;
+  padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));padding-block:22px 0}
+.lead{text-align:center;margin:0 auto 14px;max-width:72ch}
+.lead h1{font-family:var(--serif);font-size:clamp(24px,4.2vw,38px);margin:0 0 5px;letter-spacing:.02em}
+.lead p{color:var(--dim);margin:0;font-size:clamp(12.5px,2vw,15px)}
+
+/* 控制条 */
+.ctrl{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;display:flex;flex-wrap:wrap;gap:8px 10px;
+  align-items:center;justify-content:center;background:rgba(247,243,234,.92);backdrop-filter:blur(6px);
+  border:1px solid var(--soil-line);border-radius:12px;padding:9px 12px;margin:0 auto 16px;max-width:860px;box-shadow:0 4px 14px rgba(120,90,50,.1)}
+.ctrl button{all:unset;cursor:pointer;font-size:13px;color:#6b4e28;background:#fcf6ea;border:1.5px solid var(--soil-line);
+  border-radius:8px;padding:6px 12px;font-weight:600;transition:.15s}
+.ctrl button:hover{background:#fff}
+.ctrl button.on{background:var(--root);color:#fff;border-color:var(--root)}
+.ctrl .yr{font-family:var(--serif);font-size:20px;color:#6b4522;min-width:66px;text-align:center;font-weight:700}
+.ctrl input[type=range]{flex:1;min-width:140px;max-width:360px;accent-color:var(--root)}
+.ctrl .hint{font-size:11.5px;color:var(--faint);width:100%;text-align:center}
+
+/* 树冠标题 */
+.banners{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,5vw,90px);margin-bottom:6px}
+.banner{border-radius:12px;padding:10px 16px;text-align:center;color:#fff;box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.banner.l{background:linear-gradient(135deg,#3a79bd,#2b5c96)}
+.banner.r{background:linear-gradient(135deg,#4e9e61,#357a46)}
+.banner b{font-family:var(--serif);font-size:clamp(16px,2.4vw,24px);display:block}
+.banner span{font-size:12px;opacity:.92}
+
+.board{position:relative}
+svg.branches{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+svg.branches.top{z-index:15}
+.crown{position:relative;z-index:2;display:flex;justify-content:center;margin-bottom:clamp(16px,2.4vw,30px)}
+/* Agent 大框：内部架构组件 + 虚线连外部资源（仿冯诺依曼框思路）*/
+.box.agentbox{border:2.5px solid #6f9a7e !important;border-radius:16px !important;padding:11px 15px 13px !important;background:linear-gradient(120deg,#dbe8f7,#e6eef0,#dcecd6) !important;box-shadow:0 10px 30px rgba(60,90,70,.22);max-width:min(640px,94vw);min-width:0}
+.agenthead{font-family:var(--serif);font-size:clamp(14px,2vw,19px);color:#2f5a52;font-weight:700;margin-bottom:9px;text-align:center;line-height:1.3}
+.agentgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.acard{border:1px solid #bcd0c4;border-radius:8px;background:rgba(255,255,255,.78);padding:6px 8px;text-align:center;font-size:12px;font-weight:700;color:#2f5a52}
+.acard small{display:block;font-size:9px;color:var(--dim);font-weight:400;margin-top:2px;line-height:1.25}
+.acard.core{grid-column:span 4;border-color:#6f9a7e;background:#e7f3ec;font-size:14px}
+.acard.eng{grid-column:span 4;border-style:dashed;background:#f5f2ea}
+@media(max-width:620px){.agentgrid{grid-template-columns:repeat(2,1fr)}.acard.core,.acard.eng{grid-column:span 2}}
+/* Transformer 内部结构小卡：位置编码/FFN/输出头，JS 定位到 Transformer 左上/右上/右侧，随它按年份长出 */
+.tfmini{position:absolute;z-index:6;border:1.5px solid #5e9b7a;border-radius:9px;background:#dcefe3;padding:6px 11px;text-align:center;font-size:12px;font-weight:700;color:#2f5a52;box-shadow:0 3px 11px rgba(94,155,122,.26);white-space:nowrap;transition:opacity .5s}
+/* Transformer 一家：柔和薄荷绿 + 轻绿投影，一眼成组、不刺眼 */
+.tree.r .box.tfg{background:#dcefe3!important;border-color:#5e9b7a!important;box-shadow:0 2px 11px rgba(94,155,122,.24)}
+.tree.r .box.thick.tfg{border-color:#4f8c6b!important}.tree.r .box.thick.tfg b{color:#2f6a4e}
+.tfmini.future{opacity:0;pointer-events:none}
+.tfmini small{display:block;font-size:8.5px;color:var(--dim);font-weight:400;margin-top:1px}
+.startag{position:absolute;left:-7px;bottom:-7px;z-index:4;background:#e0a42c;color:#fff;font-size:9px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+/* 编译器桥牌：左树 C→汇编 边上的可点小牌，蓝→紫→绿渐变暗示"连接两树"，点开看传统/AI 编译器 */
+.brchip{position:absolute;z-index:7;display:none;flex-direction:column;align-items:center;cursor:pointer;border:1.5px solid #9a7bbf;border-radius:9px;padding:4px 11px;white-space:nowrap;background:linear-gradient(100deg,#dbe8f7,#e9e2f3,#dcecd6);box-shadow:0 3px 11px rgba(90,70,130,.22);font-size:12px;font-weight:800;color:#5a4a86;transition:box-shadow .15s,transform .15s}
+.brchip:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(90,70,130,.34)}
+.brchip small{font-size:8.5px;font-weight:600;color:#7a6aa0;margin-top:1px}
+.feeder{position:relative;z-index:2;display:flex;justify-content:center;margin-bottom:clamp(10px,1.6vw,18px)}
+.toolsbox{border:2px dashed #8a9a7e;border-radius:12px;padding:7px 18px;background:#eef3ec;box-shadow:0 3px 10px rgba(0,0,0,.08);transition:opacity .5s,transform .5s}
+.toolsbox b{font-size:13px;color:#4a6a4a;display:block}.toolsbox span{font-size:11px;color:var(--dim)}
+.cols{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,5vw,90px);align-items:end}
+.bedrock{position:relative;z-index:2;display:flex;flex-wrap:nowrap;align-items:center;gap:14px;margin-top:clamp(16px,2.4vw,28px);
+  overflow-x:auto;padding:16px 2px 6px} /* 一行到底：放不下就横向滑动，不换行；顶部留白给探出框顶的标签牌（overflow 会竖向裁切） */
+.bedrock>div:first-child{margin-left:auto}
+.bedrock>div:last-child{margin-right:auto} /* auto margin：装得下时居中，装不下时可滚 */
+.bedrock>div,.accelchain>.box,.asicinner>.box{flex-shrink:0} /* 禁止压缩：不许叠在一起 */
+/* 冯诺依曼模型框：内存(左) ↔ CPU(右)，外设(下·居中) */
+.vonbox{position:relative;border:2px solid #9c7b52;border-radius:14px;padding:20px 18px 13px;background:rgba(255,253,248,.5);display:flex;flex-direction:column;align-items:center;gap:7px}
+.vontag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#8a5a33;color:#fff;font-size:11px;font-weight:700;padding:2px 13px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+/* 后端基础设施分类框（开口·主干从底进顶出） */
+.infrabox{position:relative;width:100%;border:2px dashed #9a8fb0;border-radius:14px;padding:17px 10px 10px;background:rgba(240,235,250,.28);display:flex;flex-direction:column;align-items:center;gap:clamp(16px,2.6vw,30px)}
+.infratag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#6f5f8a;color:#fff;font-size:11px;font-weight:700;padding:2px 13px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:3}
+/* 并行 · Flynn 分类框 */
+.flynnbox{position:relative;align-self:center;border:2px solid #b07a4a;border-radius:14px;padding:18px 11px 11px;background:rgba(251,240,216,.45)}
+.flynntag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#8a5a33;color:#fff;font-size:10.5px;font-weight:700;padding:2px 11px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:3}
+.flynngrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fcard{border:1.5px dashed var(--line);border-radius:9px;background:#fff;padding:7px 10px;text-align:center;min-width:96px;font-weight:700;font-size:12.5px;color:#6b4e28;display:flex;flex-direction:column;justify-content:center}
+.fcard small{font-size:9.5px;color:var(--dim);font-weight:400;margin-top:2px;line-height:1.3}
+.box.simdnode b,.box.simtnode b{font-size:14px}
+.box.simtnode{align-self:center;min-width:120px}
+.vontop{display:flex;align-items:center;gap:10px}
+.vbus{display:flex;flex-direction:column;align-items:center;color:#8a5a33;line-height:1.15}
+.vbus .ba{font-size:17px;font-weight:800;letter-spacing:-2px}
+.vbus small{font-size:9px;color:var(--dim)}
+.vconn{color:#8a5a33;font-weight:800;font-size:13px;letter-spacing:4px;line-height:1}
+.accelwrap{display:flex;flex-direction:column;align-items:center;gap:7px}
+.accelchain{display:flex;align-items:center;gap:10px}
+/* 领域线角标（NLP/CV/ASR）*/
+.dlp{position:absolute;top:-9px;left:9px;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:9px;color:#fff !important;letter-spacing:.05em;text-shadow:0 1px 2px rgba(0,0,0,.45);box-shadow:0 1px 4px rgba(0,0,0,.25);z-index:4}
+.dlp.nlp{background:#2f6cb0}.dlp.cv{background:#d98a2b}.dlp.asr{background:#7059a5}
+.dlp.multi{background:linear-gradient(90deg,#2f6cb0,#d98a2b,#7059a5)}
+/* 领域线图例 */
+.dllegend{text-align:center;font-size:12px;color:var(--dim);margin:0 0 10px}
+.dlt{display:inline-block;font-size:10px;font-weight:800;color:#fff;padding:1px 7px;border-radius:8px;margin:0 2px 0 12px}
+.dlt.nlp{background:#2f6cb0}.dlt.cv{background:#d98a2b}.dlt.asr{background:#7059a5}
+.dlt.multi{background:linear-gradient(90deg,#2f6cb0,#d98a2b,#7059a5)}
+/* ASIC 大框：模仿冯诺依曼框，TPU/NPU 装在里面（同层一眼可见）*/
+.asicframe{position:relative;border:2px dashed #9c7b52;border-radius:14px;background:rgba(255,253,248,.5);
+  padding:16px 12px 11px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.asicframe>b{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#8a5a33;color:#fff;
+  font-size:11px;font-weight:700;padding:2px 13px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.asicframe>small{font-size:10px;color:var(--dim)}
+.asicinner{display:flex;align-items:center;gap:9px}
+/* CPU 框：寄存器/Cache/MMU 嵌在里面（内存在外）。点子节点显子卡、点框空白显 CPU 卡 */
+.box.hw.cpuframe{position:relative;border:2px solid var(--purpleEdge)!important;border-radius:13px;padding:15px 11px 9px!important;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;background:rgba(240,237,249,.78)!important}
+.cpuframe>b{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#6a5a8a;color:#fff;font-size:11px;font-weight:700;padding:2px 12px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.cpuinner{display:flex;align-items:center;gap:7px}
+.cpuinner>.box{min-width:56px;padding:5px 9px}
+.cpuinner>.box b{font-size:12.5px}
+/* 算力谱系注记 */
+.specnote{flex-basis:100%;text-align:center;margin-top:8px}
+.specnote span{display:inline-block;max-width:100%;font-size:11px;color:var(--dim);background:rgba(255,253,248,.92);border:1px solid var(--line);border-radius:8px;padding:3px 13px;box-shadow:0 1px 5px rgba(0,0,0,.07)}
+.specnote span.an{border-style:dashed;border-color:#b98a5a}
+.specnote b{color:var(--brown)}
+.tree{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,2vw,22px);min-width:0}
+.tree.l{gap:clamp(20px,3.2vw,36px)} /* 左树行距加大，给层级间的工序标签留白 */
+.row{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:9px;width:100%}
+
+.box{position:relative;border-radius:11px;padding:8px 13px;text-align:center;min-width:84px;
+  border:1.5px solid var(--blueEdge);background:var(--blueBox);box-shadow:0 2px 6px rgba(0,0,0,.06);
+  transition:opacity .5s, transform .5s;cursor:default}
+.box b{display:block;font-size:13.5px;font-weight:700;color:var(--ink)}
+.box span{font-size:11px;color:var(--dim)}
+.box small{display:block;font-size:10.5px;color:var(--faint);margin-top:2px}
+.box.hub{min-width:58%;background:#fff;border-width:2px;padding:10px 15px}
+.box.hub b{font-size:15px}
+.box.thick{border-width:3px;min-width:52%}
+.box.archc{border-width:2px} .tree.r .box.archc{border-color:var(--green)} .tree.r .box.archc b{color:var(--green)}
+.tree.l .box{border-color:var(--blueEdge);background:var(--blueBox)}
+.tree.l .box.hub,.tree.l .box.thick{border-color:var(--blue)} .tree.l .box.hub b{color:var(--blue)}
+.tree.r .box{border-color:var(--greenEdge);background:var(--greenBox)}
+.tree.r .box.hub,.tree.r .box.thick{border-color:var(--green)} .tree.r .box.hub b{color:var(--green)}
+.box.hw{background:var(--purpleBox)!important;border-color:var(--purpleEdge)!important}
+.box.collapsible{cursor:pointer}
+.box.collapsible:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.14)}
+.box .fold{position:absolute;top:-8px;right:-8px;background:var(--root);color:#fff;font-size:11px;
+  font-weight:700;border-radius:10px;padding:1px 7px;box-shadow:0 2px 5px rgba(0,0,0,.2);cursor:pointer;z-index:5}
+.box .fold:hover{background:#6b4522}
+.box.hidden{display:none}
+.box.route{min-width:160px;max-width:220px;border-width:2px}
+.tree.r .box.route{border-color:var(--green)}.tree.r .box.route b{color:var(--green)}
+.box.route small{display:block;font-size:10.5px;color:var(--dim);margin-top:2px;line-height:1.35}
+/* 外来「思想源头」节点：琥珀虚框，不在主干上，虚线接入 */
+.box.guest{border:2px dashed #d98a2b !important;background:#fdf3e3 !important}
+.box.guest b{color:#b5702f}
+.box.guest small{display:block;font-size:10px;color:#9c6b3f;margin-top:2px;line-height:1.35}
+/* 细分子枝（节点左侧 ⊕ 点开，默认折叠，可左右滑）*/
+.subrow{position:absolute;z-index:40;display:flex;align-items:stretch;gap:9px;overflow-x:auto;background:#fffdf7;border:1.5px solid #e6cf9c;border-radius:12px;box-shadow:0 12px 34px rgba(60,40,20,.24);padding:9px 11px}
+.subrow[hidden]{display:none}
+.sublabel{flex:none;align-self:center;font-size:11px;color:var(--brown);font-weight:800;line-height:1.3;text-align:center;padding:0 6px 0 2px;border-right:1px dashed var(--line)}
+.box.subnode{flex:none;min-width:150px;max-width:180px;background:#fffaf0 !important;border-color:#e6cf9c !important;border-style:dashed}
+.box.subnode b{font-size:12.5px;color:#6b4e28}
+.box.subnode small{font-size:10.5px;color:var(--dim);display:block;margin-top:2px;white-space:normal;line-height:1.45}
+.subtoggle{position:absolute;top:50%;transform:translateY(-50%);width:20px;height:20px;line-height:19px;text-align:center;border-radius:50%;background:var(--root);color:#fff;font-size:13px;font-weight:800;cursor:pointer;z-index:6;box-shadow:0 1px 4px rgba(0,0,0,.28)}
+.subtoggle.left{left:-13px}.subtoggle.right{right:-13px}
+.subtoggle:hover{background:#6b4522}
+.box.future{opacity:0;transform:translateY(10px);pointer-events:none}
+.vonbox,.specnote,.dllegend{transition:opacity .5s}
+.vonbox.future,.specnote.future,.dllegend.future,.flynnbox.future,.infrabox.future{opacity:0;pointer-events:none} /* 装饰框随锚点年份淡入，不提前挂着 */
+.note{align-self:center;font-size:11px;color:var(--dim);background:#fff;border:1px dashed var(--faint);border-radius:8px;padding:4px 8px;max-width:150px}
+
+.root{position:relative;z-index:2;display:flex;justify-content:center;margin-top:4px}
+.rootbox{border:2.5px solid var(--root);background:linear-gradient(#fbf1e2,#f3e2c9);border-radius:14px;
+  padding:12px 28px;text-align:center;box-shadow:0 8px 24px rgba(120,80,40,.22)}
+.rootbox b{font-family:var(--serif);font-size:clamp(18px,2.8vw,25px);color:#6b4522;display:block}
+.rootbox span{font-size:12px;color:#8a6a45}
+.soil{position:relative;z-index:2;border-radius:14px;background:linear-gradient(var(--soil),var(--soil2));
+  border:1.5px solid var(--soil-line);padding:14px clamp(10px,3vw,24px);margin-top:12px}
+.soil .shead{font-family:var(--serif);font-size:14px;color:#6b4e28;font-weight:700;margin-bottom:9px;text-align:center}
+.soil .shead span{font-weight:400;font-size:12px;color:#8a6c40}
+.soil .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+.soil .cell{background:#fcf6ea;border:1.5px solid var(--soil-line);border-radius:10px;padding:8px 9px;text-align:center}
+.soil .cell b{display:block;font-size:12px;color:#5c4524}
+.soil .cell span{font-size:10.5px;color:#8a6c40}
+@media(max-width:920px){.banners,.cols{grid-template-columns:1fr;gap:26px}.soil .grid{grid-template-columns:repeat(2,1fr)}}
+/* 树冠光晕（两棵树各一团淡色树荫）与根须 */
+.tree{position:relative}
+.tree::before{content:"";position:absolute;left:-5%;right:-5%;top:-2%;height:64%;border-radius:50%;pointer-events:none;z-index:-1}
+.tree.l::before{background:radial-gradient(50% 50% at 50% 42%, rgba(104,146,190,.16), transparent 72%)}
+.tree.r::before{background:radial-gradient(50% 50% at 50% 42%, rgba(127,176,105,.18), transparent 72%)}
+.root{flex-direction:column;align-items:center}
+.rootbox{cursor:pointer;position:relative;z-index:2}
+.rootbox:hover{box-shadow:0 10px 30px rgba(120,80,40,.32)}
+svg.roots{display:block;margin-top:-3px}
+/* 讲解卡：居中弹出。钉住节点讲单枝；逐年生长时讲「这一年发生了什么」，手动关 */
+#infoCard{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;
+  width:min(460px,calc(100vw - 40px));max-height:70vh;overflow:auto;background:#fffdf7;border:2px solid var(--root);
+  border-radius:14px;box-shadow:0 18px 60px rgba(60,40,20,.35);padding:16px 40px 16px 18px;display:none}
+#infoCard.show{display:block}
+#infoCard h3{margin:0 0 2px;font-family:var(--serif);font-size:18px;color:#6b4522}
+#infoCard .yr2{font-size:11px;color:var(--faint);margin-bottom:8px}
+#infoCard .icbody{font-size:13px;line-height:1.75;color:var(--dim)}
+#infoCard .ic-item{margin:0 0 9px}
+#infoCard .ic-item:last-child{margin-bottom:0}
+#infoCard .ic-item b{color:var(--ink)}
+#infoCard .em{color:#c0392b;font-weight:700}
+#infoCard .x{all:unset;position:absolute;top:10px;right:14px;cursor:pointer;color:var(--faint);font-size:17px;line-height:1}
+#infoCard .x:hover{color:var(--root)}
+#infoCard h3{cursor:move}
+#infoCard.wide{width:min(640px,calc(100vw - 40px))}
+#infoCard .sublabel2{margin:13px 0 7px;font-size:12px;font-weight:700;color:var(--root)}
+#infoCard .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#infoCard .subitem{border:1px solid var(--line);border-left:3px solid var(--root);border-radius:8px;background:#fff;padding:7px 10px}
+#infoCard .subitem b{display:block;font-size:12px;color:var(--ink);margin-bottom:2px}
+#infoCard .subitem span{font-size:10.5px;color:var(--dim);line-height:1.5}
+@media(max-width:560px){#infoCard .subgrid{grid-template-columns:1fr}}
+#infoCard .downbtn{all:unset;cursor:pointer;display:inline-block;margin:12px 0 2px;font-size:12.5px;font-weight:700;color:#c0392b;border:1.5px solid #c0392b;border-radius:8px;padding:5px 12px}
+#infoCard .downbtn:hover{background:#fbeeee}
+#infoCard .downbtn.on{background:#c0392b;color:#fff}
+/* 卡片内「可视化小树」：色块分支卡 + 小 chip，一眼成组；收敛项横铺带 ▼ */
+#infoCard .mt2{margin-top:13px;display:flex;flex-wrap:wrap;gap:9px;align-items:flex-start}
+#infoCard .mt2-lead{flex-basis:100%;font-size:11.5px;color:var(--root);font-weight:700;line-height:1.5;margin:0}
+#infoCard .mt2-b{flex:1 1 150px;min-width:140px;border:1px solid var(--line);border-top:4px solid var(--line);border-radius:10px;background:#fff;padding:8px 9px 9px;display:flex;flex-direction:column;gap:6px}
+#infoCard .mt2-b.sup{border-top-color:#2f6cb0;background:#f5f9ff}
+#infoCard .mt2-b.unsup{border-top-color:#3f8f52;background:#f3fbf4}
+#infoCard .mt2-b.rl{border-top-color:#d08a3a;background:#fdf7ee}
+#infoCard .mt2-b.core{flex-basis:100%;border-top-color:#8a5a33;background:#fbf4e8}
+#infoCard .mt2-h{font-size:12.5px;font-weight:800;color:var(--ink);display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;line-height:1.3}
+#infoCard .mt2-h small{font-weight:600;color:var(--dim);font-size:10px}
+#infoCard .mt2-chips{display:flex;flex-direction:column;gap:5px}
+#infoCard .mt2-b.core .mt2-chips{flex-direction:row;flex-wrap:wrap}
+#infoCard .mt2-c{border:1px solid #e7dfce;border-radius:7px;background:#fffdf9;padding:4px 8px;font-size:11px;line-height:1.35}
+#infoCard .mt2-c b{color:#353a45;font-weight:700}
+#infoCard .mt2-c small{display:block;color:var(--dim);font-size:9.5px;line-height:1.4;margin-top:1px;font-weight:400}
+#infoCard .mt2-foot{flex-basis:100%;font-size:10.5px;color:var(--faint);line-height:1.5;margin-top:1px}
+/* 编译与执行流水线：独立区块，横向流程，三条执行路径 */
+.pipe-sec{border-top:1px solid var(--line);margin-top:30px;padding-block:54px 14px;position:relative}
+#linkSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+.pipe-sec .eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.16em;color:var(--root);text-transform:uppercase}
+.pipe-sec h2{font-family:var(--serif);font-size:clamp(22px,3.6vw,32px);margin:8px 0 8px}
+.pipe-sec .intro{color:var(--dim);max-width:72ch;margin:0;font-size:14px;line-height:1.6}
+.hflow{overflow-x:auto;overflow-y:hidden;padding-bottom:12px;margin-top:22px}
+.hinner{position:relative;display:flex;align-items:center;gap:30px;width:max-content;padding:8px 6px}
+.src{flex:none;align-self:center;width:118px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  border:2px solid var(--root);border-radius:12px;background:linear-gradient(#fbf1e2,#f3e2c9);
+  font-family:var(--serif);font-size:19px;color:#6b4522;text-align:center;padding:12px 10px}
+.src small{font-family:var(--sans);font-size:10.5px;color:#8a6a45;margin-top:5px;font-weight:400;line-height:1.3}
+.paths{flex:none;display:flex;flex-direction:column;gap:16px;justify-content:center}
+.prow{display:flex;flex-direction:column;gap:4px}
+.path{display:flex;align-items:center;gap:7px;padding-bottom:3px}
+.path .tag{flex:none;min-width:90px;font-size:12.5px;font-weight:700;color:#fff;border-radius:8px;padding:8px 9px;text-align:center}
+.tag.t-i{background:#4e86c4}.tag.t-j{background:#4f9e61}.tag.t-n{background:#7b6bb0}
+.path .stg{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--ink);text-align:center;white-space:nowrap}
+.path .stg small{display:block;font-size:10px;color:var(--dim);font-weight:400;margin-top:2px}
+.path i{flex:none;color:var(--root);font-style:normal;font-weight:700}
+.pnote{font-size:11.5px;color:var(--faint);padding-left:98px}
+.runtime{margin-top:24px;background:#fbf7ef;border:1px dashed var(--soil-line);border-radius:12px;padding:16px 18px}
+.rt-head{font-size:13.5px;color:#6b4e28;margin-bottom:12px}
+.rt-head b{color:#6b4522}
+.rt-link{text-align:center;margin:2px auto 18px;max-width:720px;line-height:1.6}
+.mrows{display:flex;flex-direction:column;gap:7px;margin:0 0 14px;padding-left:4px}
+.mr{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--dim)}
+.mr b{color:var(--ink);font-weight:600}
+.mr .mt{flex:none;min-width:86px;font-size:11.5px;font-weight:700;color:#fff;border-radius:7px;padding:4px 8px;text-align:center}
+.rt-head2{font-size:13px;color:#6b4e28;margin:4px 0 14px}
+.rt-head2 b{color:#6b4522}
+.seg.hot{box-shadow:0 0 0 2px var(--root)}
+.seg.hot .st em{color:var(--root);font-weight:700}
+.rt-flow{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center}
+.vaddr{flex:none;width:350px;max-width:100%;border:1.5px solid var(--soil-line);border-radius:10px;background:#fcf7ee;padding:10px 12px}
+.vlabel{text-align:center;font-weight:700;font-size:13px;color:#6b4e28;margin-bottom:6px}
+.vend{text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--faint);margin:3px 0}
+.seg{border:1px solid var(--line);border-left-width:5px;border-radius:6px;background:#fff;padding:6px 10px;margin:4px 0}
+.seg .st{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.seg .st b{font-size:13px}
+.seg .st em{font-style:normal;font-size:11px;color:var(--faint)}
+.seg>span{display:block;font-size:11px;color:var(--dim);margin-top:1px}
+.s-stack{border-left-color:#c76b6b}.s-heap{border-left-color:#d9a441}.s-data{border-left-color:#4f9e61}.s-text{border-left-color:#4e86c4}.s-cc{border-left-color:#7059a5;border-left-style:dashed}
+.vgap{text-align:center;font-size:11px;color:var(--faint);padding:3px 0}
+.vmid{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--dim);text-align:center;max-width:120px}
+.vmid i{font-style:normal;color:var(--root);font-weight:700;font-size:22px;line-height:1}
+.pipe-sec .hw{flex:none;display:flex;flex-direction:column;gap:9px;width:240px;max-width:100%} /* 只作用于流水线区：别和地基节点的 hw 类撞名 */
+.hwbox{border:2px solid var(--purpleEdge);background:var(--purpleBox);border-radius:10px;padding:10px 14px;text-align:center}
+.hwbox b{font-size:14px;display:block;color:#5a4a86}.hwbox small{font-size:11px;color:var(--dim)}
+.hwnote{font-size:11px;color:var(--faint);line-height:1.5}
+@media(max-width:920px){.rt-flow{flex-direction:column;align-items:stretch}.vaddr,.pipe-sec .hw{width:100%}.vmid{flex-direction:row;max-width:none}.vmid i{transform:rotate(90deg)}}
+@media(max-width:920px){.pipe{flex-direction:column}.pipe .src{width:100%;flex-direction:row;gap:10px;justify-content:flex-start}.pnote{padding-left:0}}
+footer{text-align:center;color:var(--faint);font-size:12px;padding:20px 0 34px}
+.xdiv{max-width:1180px;margin:60px auto 8px;display:flex;align-items:center;gap:18px;padding:0 24px}
+.xdiv::before,.xdiv::after{content:"";flex:1;border-top:2px dashed #cdbb93}
+.xdiv i{font-style:normal;color:#9c6b2f;font-size:12.5px;letter-spacing:2px;font-weight:800;white-space:nowrap;font-family:"Songti SC",serif}
+</style>
+
+<style>
+.legend{position:fixed;top:14px;right:14px;z-index:60;background:rgba(255,253,248,.93);border:1px solid #e4d9c4;border-radius:12px;padding:10px 13px 11px;box-shadow:0 8px 24px rgba(90,70,35,.16);font-size:12px;backdrop-filter:blur(5px);max-width:220px}
+.legend .lgt{font-weight:800;color:#5a4a33;margin-bottom:7px;font-size:12.5px;letter-spacing:.3px}
+.legend .lgi{display:flex;align-items:center;gap:8px;margin:5px 0;color:#4a4036;line-height:1.3}
+.legend .lgi b{font-weight:700;white-space:nowrap}
+.legend .lgi small{color:#9a8f7f;font-size:10.5px}
+.legend .sw{width:24px;height:0;border-top-width:3px;border-top-style:solid;display:inline-block;flex:0 0 24px}
+.legend .sw.evo{border-top-color:#7a5230}
+.legend .sw.impl{border-top-color:#8a5fb0}
+.legend .sw.run{border-top-color:#3f7fb0}
+.legend .sw.spec{border-top-color:#9398a2;border-top-style:dashed}
+.legend .sw.use{border-top-color:#d08a3a;border-top-style:dashed}
+.legend .lgn{margin-top:7px;padding-top:6px;border-top:1px dashed #e0d5bf;color:#8a8070;font-size:10.5px;line-height:1.45}
+.legend .lgn b{color:#6a5c45}
+@media(max-width:820px){.legend{font-size:10.5px;padding:7px 9px;top:8px;right:8px;max-width:170px}.legend .lgi small{display:none}.legend .sw{flex-basis:18px;width:18px}}
+</style>
+<div class="legend" aria-label="关系图例">
+  <div class="lgt">关系图例 · 线色＝关系</div>
+  <div class="lgi"><span class="sw evo"></span><b>演进谱系</b><small>代际 / 谱系</small></div>
+  <div class="lgi"><span class="sw impl"></span><b>实现构建</b><small>用 X 写 · 编译为</small></div>
+  <div class="lgi"><span class="sw run"></span><b>运行依赖</b><small>跑在 / 依赖</small></div>
+  <div class="lgi"><span class="sw spec"></span><b>规范表达</b><small>ISA↔汇编/CPU</small></div>
+  <div class="lgi"><span class="sw use"></span><b>算力·能力使用</b><small>GPU⇢DL · →Agent</small></div>
+  <div class="lgn">盒子颜色＝<b>哪棵树</b>（蓝＝计算机 / 绿＝AI）；线的颜色只表示<b>关系类型</b>。</div>
+</div>
+<div class="wrap">
+  <div class="lead">
+    <h1>计算机与人工智能知识树</h1>
+    <p>同一粒种子——图灵 1936 年的一纸证明——长成两棵树。按年份生长，点枝收展。</p>
+  </div>
+
+  <div class="ctrl">
+    <button id="grow">▶ 从头生长</button>
+    <button id="step">⏭ 下一步</button>
+    <span class="yr" id="yrLabel">全</span>
+    <input type="range" id="slider" min="0" max="100" value="100">
+    <button id="full">全部长好</button>
+    <div class="hint">悬停 = 把节点连到底层的那条棕线提到最前 · 点击 = 钉住棕线并弹出讲解卡（部分节点卡里可「展开扩展内容」，左右滑动看）· ▶ 生长 / ⏭ 单步时自动弹出「这一年长出了什么」· 图灵也可点</div>
+  </div>
+
+  <div class="banners">
+    <div class="banner l"><b>计算机与软件之树</b><span>从硬件到通用计算的演进</span></div>
+    <div class="banner r"><b>人工智能之树</b><span>从数学到智能的涌现</span></div>
+  </div>
+  <div class="dllegend">AI 树领域线（和架构正交）：<span class="dlt nlp">NLP</span>自然语言<span class="dlt cv">CV</span>视觉<span class="dlt asr">ASR</span>语音<span class="dlt multi">跨</span>多模态</div>
+  <div class="dllegend xcut" data-id="xcut" style="margin:5px auto 0;max-width:min(700px,94vw);border:2px dashed #b89a5a;border-radius:12px;padding:7px 15px;background:rgba(251,245,230,.6);font-size:11.5px"><b style="color:#8a5a33">横切技术 · 训练与规模化</b>（跨架构，不是单独模型）：<b style="color:#8a5a33">Scaling Law</b> 规模律 · <b style="color:#8a5a33">MoE</b> 专家混合 · <b style="color:#8a5a33">RLHF/DPO</b> 偏好对齐 · <b style="color:#8a5a33">LoRA</b> 低秩微调 · <b style="color:#8a5a33">Reasoning</b> 推理范式（长 CoT / 测试时计算 / o1 式）</div>
+
+  <div class="board" id="board">
+    <svg class="branches" id="branches" preserveAspectRatio="none"></svg>
+    <svg class="branches top" id="branchesTop" preserveAspectRatio="none"></svg>
+    <div class="tfmini" id="tf_pos">位置编码 · RoPE<small>欧拉公式 / 极坐标旋转</small><span class="startag">★</span></div>
+    <div class="tfmini" id="tf_ffn">FFN 前馈<small>两层全连接 · 升维降维</small><span class="startag">★</span></div>
+    <div class="tfmini" id="tf_an">残差连接 + 层归一化<small>Add &amp; Norm · 稳住训练</small><span class="startag">★</span></div>
+    <div class="tfmini" id="tf_out">输出头<small>→ 下一个 token</small><span class="startag">★</span></div>
+    <div class="brchip" id="compiler_chip">⚙ 编译器<small>传统 ⇄ AI · 点开</small></div>
+    <div class="crown">
+      <div class="box agentbox" data-id="agent" data-year="2023">
+        <div class="agenthead"><b>Agent · 智能体</b> — <span style="color:#8a5a33">Harness · Loop</span>：把 LLM 与组件编排成「感知-规划-执行-反馈」闭环</div>
+        <div class="agentgrid">
+          <div class="acard core">LLM<small>认知与推理引擎 · 大脑</small></div>
+          <div class="acard">Planning<small>规划 · 任务分解</small></div>
+          <div class="acard">Memory<small>短期 + 长期记忆</small></div>
+          <div class="acard">Tools<small>工具调用（含 MCP）</small></div>
+          <div class="acard">Runtime<small>运行环境 · 沙箱</small></div>
+          <div class="acard">State<small>状态管理</small></div>
+          <div class="acard">Feedback<small>执行结果反馈</small></div>
+          <div class="acard">Security<small>权限 / 安全边界</small></div>
+          <div class="acard">Workflow<small>多步编排 · 流程</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="cols">
+      <!-- ================= 左树（计算机）：顶→底书写，底层贴根 ================= -->
+      <div class="tree l" id="treeL">
+        <!-- 后端基础设施：中间件 → 分布式系统 → 云计算（能力递进·主干延续到树冠）。数据库/MQ 等在中间件的「细分」卡里 -->
+        <div class="infrabox">
+          <div class="infratag">后端基础设施 · 云原生</div>
+          <div class="row"><div class="box hub" data-id="cloud" data-year="2006" data-parent="distsys"><b>云计算</b><span>虚拟化(VM/容器) + 分布式 → 弹性平台 · K8s</span></div></div>
+          <div class="row"><div class="box hub" data-id="distsys" data-year="2006" data-parent="middleware"><b>分布式系统</b><span>单机→集群：共识(Raft/Paxos) · 复制 · 分区 · CAP</span></div></div>
+          <div class="row"><div class="box hub softdep" data-id="middleware" data-rel="impl" data-year="1995" data-parent="langs"><b>后端中间件</b><span>数据库 · 消息队列 · 缓存 · Web 服务器（用语言写，依赖 OS）</span></div></div>
+        </div>
+        <!-- 顶：高级语言生态（三支执行模型） -->
+        <div class="row">
+          <div class="box" data-id="native" data-year="2009" data-parent="langs"><b>编译原生 · AOT</b><span>Go · Rust（编到原生机器码、不进 VM；C 同属 AOT）</span></div>
+          <div class="box" data-id="interp" data-year="1991" data-parent="langs"><b>字节码 · 纯解释</b><span>CPython（无 JIT · 解释器 dispatch 执行）</span></div>
+          <div class="box" data-id="jvm" data-year="1995" data-parent="langs"><b>字节码 · 解释 + JIT</b><span>Java · JS/Node · Kotlin · Scala（热点 JIT）</span></div>
+          <div class="box" data-id="web" data-year="1995" data-parent="jvm"><b>前端 · Web</b><small>JS 在浏览器里做 UI<br>HTML/CSS · Vue/React</small></div>
+        </div>
+        <div class="row"><div class="box hub" data-id="langs" data-rel="run" data-year="1991" data-parent="os"><b>高级语言生态</b><span>跑在操作系统上</span></div></div>
+        <div class="row"><div class="box hub" data-id="os" data-rel="impl" data-year="1969" data-parent="cc"><b>操作系统</b><span>Linux ＝ Unix 思想 + Minix 启发 + C 实现　·　Windows / macOS</span></div><div class="box" data-id="net" data-year="1983" data-parent="os"><b>网络 · TCP/IP</b><small>Socket · TCP/UDP/IP · DNS<br>OS 提供 · 分布式/云/Agent 的底座</small></div></div>
+        <div class="row">
+          <div class="box hub" data-id="cc" data-rel="impl" data-year="1972" data-parent="asm"><b>C</b><span>系统编程语言 · GCC/Clang 工具链</span></div>
+          <div class="box" data-id="cpp" data-year="1983" data-parent="cc"><b>C++</b><small>1983 · C + 面向对象</small></div>
+        </div>
+        <div class="row"><div class="box hub" data-id="asm" data-rel="spec" data-year="1949" data-parent="isa"><b>汇编语言</b><span>直接对着 ISA 写 · 助记符</span></div></div>
+        <div class="row">
+          <div class="box" data-id="x86" data-year="1978" data-parent="isa"><b>x86</b><small>CISC · Intel/AMD</small></div>
+          <div class="box" data-id="arm" data-year="1985" data-parent="isa"><b>ARM</b><small>RISC</small></div>
+          <div class="box" data-id="riscv" data-year="2010" data-parent="isa"><b>RISC-V</b><small>RISC · 开源</small></div>
+        </div>
+        <div class="row"><div class="box hub" data-id="isa" data-rel="spec" data-year="1945" data-parent="cpu"><b>ISA 指令集</b><span>早期指令集思想（1940s 存储程序机）· 1964 S/360 定名架构</span></div></div>
+      </div>
+
+      <!-- ================= 右树（AI） ================= -->
+      <div class="tree r" id="treeR">
+        <!-- 顶行：两个角落的「特殊」浮动节点——Jev 判断服务(左) · 多模态(右角)。模型部署与推理移到 Transformer 左侧（见下） -->
+        <div class="row" style="justify-content:space-between">
+          <div class="box" data-id="jev" data-year="2026" style="border:2px dashed #dca2a2;background:#fcf1f1"><b style="color:#b86a6a">Jev</b><small>判断服务 · Choice/Score/Noul · 不生成</small></div>
+          <div class="box" data-id="mm" data-year="2021" style="border:2px dashed #b0708f;background:#f7eef4"><span class="dlp multi">跨</span><b>多模态</b><small>跨架构能力</small></div>
+        </div>
+        <!-- 代表模型行：各挂到所属架构类别（6 个，一行放下） -->
+        <div class="row">
+          <div class="box" data-id="bert" data-year="2018" data-parent="enc"><span class="dlp nlp">NLP</span><b>BERT</b><small>2018 · 理解</small></div>
+          <div class="box" data-id="vit" data-year="2020" data-parent="enc"><span class="dlp cv">CV</span><b>ViT</b><small>2020 · 图像当词</small></div>
+          <div class="box" data-id="t5" data-year="2019" data-parent="encdec"><span class="dlp nlp">NLP</span><b>T5</b><small>2019 · 文本到文本</small></div>
+          <div class="box" data-id="whisper" data-year="2022" data-parent="encdec"><span class="dlp asr">ASR</span><b>Whisper</b><small>2022 · 弱监督多语言</small></div>
+          <div class="box" data-id="oss" data-year="2023" data-parent="gpt"><b>开源</b><small>Llama/Qwen</small></div>
+          <div class="box" data-id="closed" data-year="2023" data-parent="gpt"><b>闭源</b><small>GPT/Claude</small></div>
+        </div>
+        <!-- 架构类别行：按 encoder/decoder 分三类，是技术演进轴（树结构） -->
+        <div class="row">
+          <div class="box archc" data-id="enc" data-year="2018" data-parent="transformer"><b>仅编码器</b><small>Encoder-only · 理解</small></div>
+          <div class="box archc" data-id="encdec" data-year="2019" data-parent="transformer"><b>编码器-解码器</b><small>Enc-Dec · seq2seq</small></div>
+          <div class="box archc" data-id="gpt" data-year="2018" data-parent="transformer"><b>仅解码器</b><small>Decoder-only · 现代 LLM</small></div>
+        </div>
+        <!-- 模型部署与推理：单独左对齐甩到左侧空地，斜线短连 Transformer 左端。浮动、typed-edge -->
+        <div class="row" style="justify-content:flex-start"><div class="box" data-id="infer" data-year="2023" style="border:2px dashed #7a95ad;background:#eef3f8;margin-top:140px;margin-left:-78px"><b>模型部署与推理</b><small>KV Cache · 量化<br>批处理 · vLLM</small></div></div>
+        <div class="row"><div class="box thick tfg" data-id="transformer" data-year="2017" data-parent="attn"><b>Transformer</b><span>2017 · 编码器 + 解码器（粗干）</span></div></div>
+        <!-- 序列建模主线：RNN →(旁枝 LSTM)→ 注意力机制 → Transformer；CNN 是 dl 的另一支 -->
+        <div class="row">
+          <div class="box tfg" data-id="attn" data-year="2014" data-parent="rnn"><span class="dlp nlp">NLP</span><b>注意力机制</b><small>2014 · 为 Seq2Seq 瓶颈而生</small><span class="startag">★</span></div>
+          <div class="box" data-id="vecdb" data-year="2020" data-parent="embed"><span class="dlp nlp">NLP</span><b>向量数据库</b><small>存 Embedding 做相似检索<br>传统库+插件 / 纯向量库</small></div>
+          <div class="box tfg" data-id="embed" data-year="2018" data-parent="w2v"><span class="dlp nlp">NLP</span><b>词嵌入 Embedding</b><small>稠密向量·语义相邻<br>Transformer 输入层</small><span class="startag">★</span></div>
+        </div>
+        <div class="row">
+          <div class="box" data-id="cnn" data-year="2012" data-parent="dl"><span class="dlp cv">CV</span><b>CNN</b><small>卷积 · 2012 AlexNet 引爆</small></div>
+          <div class="box" data-id="rnn" data-year="1986" data-parent="dl"><span class="dlp nlp">NLP</span><b>RNN</b><small>1980s · 早期循环网络</small></div>
+          <div class="box" data-id="lstm" data-year="1997" data-parent="rnn"><b>LSTM</b><small>1997 · 门控记忆解长依赖</small></div>
+          <div class="box" data-id="w2v" data-year="2013" data-parent="wordvec"><span class="dlp nlp">NLP</span><b>Word2Vec</b><small>2013 · skip-gram · 稠密词向量</small></div>
+          <div class="box" data-id="gen" data-year="2014" data-parent="dl"><b>生成式模型</b><small>GAN 2014 → Diffusion 2020</small></div>
+        </div>
+        <div class="row">
+          <div class="box hub" data-id="dl" data-year="2006" data-parent="ml"><b>深度学习</b><span>机器学习的一支 · 模型训练与推理</span></div>
+          <div class="box" data-id="rl" data-year="1989" data-parent="ml"><b>强化学习</b><small>ML 三范式之一 · 试错+奖励<br>深度 RL(虚线) · AlphaGo 2016</small></div>
+        </div>
+        <!-- NLP 文本表示：放机器学习右上角（右对齐），让 Word2Vec→它 的线走右侧、不穿强化学习 -->
+        <div class="row" style="justify-content:flex-end">
+          <div class="box" data-id="wordvec" data-year="2013" data-parent="ml" style="margin-right:-38px"><span class="dlp nlp">NLP</span><b>NLP 文本表示</b><small>统计 → 神经<br>ngram→词袋→Word2Vec→嵌入</small></div>
+        </div>
+        <div class="row">
+          <div class="box" data-id="fp" data-year="1958" data-parent="percep"><b>前向传播</b><small>输入→输出 · 逐层计算</small></div>
+          <div class="box" data-id="bp" data-year="1986" data-parent="percep"><b>反向传播</b><small>1986 推广 · 多层网络可训</small></div>
+          <div class="box" data-id="ml" data-year="1959" data-parent="percep"><b>机器学习</b><small>监督 / 无监督 / 强化</small></div>
+        </div>
+        <div class="row">
+          <div class="box" data-id="percep" data-year="1958" data-parent="conn"><b>感知机 / 神经网络</b><small>1958 Rosenblatt · 多层感知机</small></div>
+          <div class="box guest" data-id="nn" data-year="1958"><b>人工神经元</b><small>1943 McCulloch-Pitts<br>思想源头 · 来自神经科学</small></div>
+        </div>
+        <div class="row">
+          <div class="box" data-id="expert" data-year="1965" data-parent="sym"><b>专家系统</b><small>知识库 + 推理机</small></div>
+        </div>
+        <!-- 早期两条并行路线：连接主义 / 符号主义，都从图灵（提出「机器能思考吗」）分出，各有源头 -->
+        <div class="row">
+          <div class="box route" data-id="conn" data-year="1958" data-parent="__root"><b>连接主义</b><small>神经元/网络学智能<br>源自神经科学</small></div>
+          <div class="box route" data-id="sym" data-year="1956" data-parent="__root"><b>符号主义</b><small>逻辑·搜索·规划<br>知识表示</small></div>
+        </div>
+      </div>
+    </div>
+    <!-- 共享地基：两树公用的计算资源，像图灵一样画在中间。左树 ISA 扎进来；右树深度学习的算力虚线也扎进来 -->
+    <div class="bedrock">
+      <div class="vonbox">
+        <div class="vontag">冯诺依曼模型 · 存储程序</div>
+        <div class="vontop">
+          <div class="box hw cpuframe" data-id="mem" data-year="1945">
+            <b>内存 · 存储器</b>
+            <div class="cpuinner">
+              <div class="box hw" data-id="dram" data-year="1966"><b>DRAM</b><small>主存·动态</small></div>
+              <div class="box hw" data-id="ddr" data-year="2000"><b>DDR</b><small>DDR4/5 接口</small></div>
+              <div class="box hw" data-id="vram" data-year="2008"><b>显存</b><small>HBM/GDDR</small></div>
+            </div>
+          </div>
+          <div class="vbus"><span class="ba">◀──▶</span><small>总线</small></div>
+          <div class="box hw" data-id="mmu" data-year="1970" style="min-width:54px;padding:6px 9px"><b>MMU</b><small>虚拟→物理</small></div>
+          <div class="vbus"><span class="ba">◀──▶</span><small>地址</small></div>
+          <div class="box hw cpuframe" data-id="cpu" data-year="1945" data-parent="__root">
+            <b>CPU · 运算器+控制器</b>
+            <div class="cpuinner">
+              <div class="box hw" data-id="reg" data-year="1945"><b>寄存器</b><small>最快最小</small></div>
+              <div class="box hw" data-id="cache" data-year="1965"><b>Cache</b><small>L1/L2/L3</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="vconn">▲▼</div>
+        <div class="box hw" data-id="periph" data-year="1956"><b>外设</b><span>输入 / 输出设备</span></div>
+      </div>
+      <!-- 并行桥：CPU → Flynn 分类(SIMD) → SIMT → GPU，打通计算机与 AI 的「同时算更多数据」 -->
+      <div class="flynnbox">
+        <div class="flynntag">并行 · Flynn 分类（怎么同时处理更多数据）</div>
+        <div class="flynngrid">
+          <div class="fcard">SISD<small>单指令单数据<br>传统标量</small></div>
+          <div class="box hw simdnode" data-id="simd" data-year="1996" data-parent="cpu"><b>SIMD</b><small>单指令多数据 · 向量</small></div>
+          <div class="fcard">MISD<small>多指令单数据<br>罕见/容错</small></div>
+          <div class="fcard">MIMD<small>多指令多数据<br>多核/多机</small></div>
+        </div>
+      </div>
+      <div class="accelwrap">
+        <div class="accelchain">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <div class="box hw accel" data-id="gpu" data-year="1999" data-parent="simd"><b>GPU</b><small>1999 · 大规模并行</small></div>
+            <div style="font-size:11px;color:#8a5a33;font-weight:800;line-height:1">▼</div>
+            <div class="box hw simtnode" data-id="simt" data-year="2006"><b>SIMT</b><small>GPU 执行模型<br>单指令多线程</small></div>
+          </div>
+          <div class="box hw accel" data-id="fpga" data-year="1985" data-parent="gpu"><b>FPGA</b><small>可编程 · 半定制</small></div>
+          <div class="box hw accel asicframe" data-id="asic" data-year="1981" data-parent="fpga">
+            <b>ASIC · 专用集成电路</b><small>1980s · 固化电路 · 专芯专用</small>
+            <div class="asicinner">
+              <div class="box hw accel" data-id="tpu" data-year="2016" data-parent="asic"><b>TPU</b><small>2016 · 张量专用</small></div>
+              <div class="box hw accel" data-id="npu" data-year="2017" data-parent="asic"><b>NPU</b><small>2017 · 端侧推理</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="specnote"><span class="an"><b>算力谱系</b>　CPU → GPU → FPGA → ASIC(TPU/NPU)　灵活性↓ 效率↑</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="root">
+    <div class="rootbox" id="rootbox"><b>图灵　Alan Turing</b><span>计算机科学之父 · 人工智能之父　（1936）</span></div>
+    <svg class="roots" width="340" height="46" viewBox="0 0 340 46" aria-hidden="true">
+      <path d="M170 0 L170 44" stroke="#8a5a33" stroke-width="12" stroke-linecap="round" opacity=".85" fill="none"/>
+      <path d="M168 2 C150 16 96 20 28 38" stroke="#8a5a33" stroke-width="8" stroke-linecap="round" opacity=".8" fill="none"/>
+      <path d="M172 2 C190 16 244 20 312 38" stroke="#8a5a33" stroke-width="8" stroke-linecap="round" opacity=".8" fill="none"/>
+      <path d="M169 4 C158 24 132 32 108 44" stroke="#9c6b3f" stroke-width="5" stroke-linecap="round" opacity=".75" fill="none"/>
+      <path d="M171 4 C182 24 208 32 232 44" stroke="#9c6b3f" stroke-width="5" stroke-linecap="round" opacity=".75" fill="none"/>
+    </svg>
+  </div>
+
+  <div class="soil">
+    <div class="shead">共同的土壤　<span>基础理论（1936 及更早）</span></div>
+    <div class="grid">
+      <div class="cell"><b>可计算性理论</b><span>图灵机、可判定性</span></div>
+      <div class="cell"><b>形式语言与自动机</b><span>正则、上下文无关文法</span></div>
+      <div class="cell"><b>数学基础</b><span>集合、逻辑、证明</span></div>
+      <div class="cell"><b>信息理论</b><span>香农：信息熵 · 交叉熵损失</span></div>
+      <div class="cell"><b>计算复杂度</b><span>P、NP 等</span></div>
+      <div class="cell"><b>数值计算</b><span>算法与数值分析</span></div>
+      <div class="cell"><b>线性代数</b><span>矩阵 · 19 世纪（高斯、凯莱）</span></div>
+      <div class="cell"><b>微积分</b><span>导数/积分 · 17 世纪（牛顿、莱布尼茨）</span></div>
+      <div class="cell"><b>概率统计</b><span>分布与推断 · 17–19 世纪</span></div>
+      <div class="cell"><b>高等数学</b><span>分析 · 19 世纪严格化</span></div>
+    </div>
+  </div>
+  <div class="xdiv"><i>延伸 · 一段代码怎么跑起来：编译与执行流水线</i></div>
+<section class="pipe-sec">
+    <div class="eyebrow">HOW CODE RUNS</div>
+    <h2>一段代码怎么跑起来：编译与执行流水线</h2>
+    <p class="intro">树讲的是「谁架在谁之上」；这条流水线讲的是「源码一步步变成能跑的东西」。真正的区别不是「解释 vs 编译」，而是 <b>分发物</b>（源码 / 字节码 / 机器码）× <b>运行时是否 JIT</b>——三条路由此分叉。</p>
+    <p class="rt-link">整条横着铺开（可往右拖）：源码 → 三条路（编译原生 / 字节码·纯解释 / 字节码·解释+JIT）→ 三条线汇到「代码段」→ 进程虚拟地址空间 → OS 分页 → CPU / 物理内存。</p>
+    <div class="hflow">
+      <div class="hinner">
+        <svg id="linkSvg" preserveAspectRatio="none"></svg>
+        <div class="src">源码<small>.py · .java<br>.go · .rs …</small></div>
+        <div class="paths">
+          <div class="prow">
+            <div class="path">
+              <span class="tag t-n">编译原生 · AOT</span>
+              <span class="stg">编译器前端<small>词法 / 语法 / 类型 → IR</small></span><i>→</i>
+              <span class="stg">后端 codegen<small>优化 → 机器码</small></span><i>→</i>
+              <span class="stg">链接器<small>合并库 · 重定位</small></span><i>→</i>
+              <span class="stg" id="end-native">可执行文件</span>
+            </div>
+            <div class="pnote">C · Go · Rust；编译期直接生成机器码（Rust 走 LLVM、Go 自研后端，<b style="color:var(--dim)">都不经过 C</b>）。<b>进程就是程序本身。</b></div>
+          </div>
+          <div class="prow">
+            <div class="path">
+              <span class="tag t-i">字节码 · 纯解释</span>
+              <span class="stg">编成字节码<small>.pyc</small></span><i>→</i>
+              <span class="stg" id="end-interp">解释器 dispatch<small>原生程序 · switch 逐条执行</small></span>
+            </div>
+            <div class="pnote">CPython（<b>无 JIT</b>）；字节码是<b>数据</b>，解释器逐条解释，永不为程序代码生成机器码。</div>
+          </div>
+          <div class="prow">
+            <div class="path">
+              <span class="tag t-j">字节码 · 解释 + JIT</span>
+              <span class="stg">编成字节码<small>.class / V8 字节码</small></span><i>→</i>
+              <span class="stg" id="end-jvm">解释器 + JIT<small>JVM(C1/C2) · V8</small></span>
+            </div>
+            <div class="pnote">Java · JS · Kotlin；解释器执行、<b>热点 JIT 成机器码</b>缓存，下次直接跑。</div>
+          </div>
+        </div>
+        <div class="vaddr">
+          <div class="vlabel">进程的虚拟地址空间</div>
+          <div class="vend">高地址</div>
+          <div class="seg s-stack"><div class="st"><b>栈 Stack</b><em>↓ 向下增长</em></div><span>函数调用帧 · 局部变量 · 返回地址</span></div>
+          <div class="vgap">⋮　空闲的虚拟空间</div>
+          <div class="seg s-heap" id="seg-heap"><div class="st"><b>堆 Heap</b><em>↑ 向上增长</em></div><span>动态分配（malloc / new）· 字节码/对象当数据住这类区</span></div>
+          <div class="seg s-cc" id="seg-cc"><div class="st"><b>code cache</b><em>JVM / V8</em></div><span>JIT 把热点字节码编成的机器码（不是 .text）</span></div>
+          <div class="seg s-data"><div class="st"><b>数据段 .data / .bss</b></div><span>全局变量 · 静态变量</span></div>
+          <div class="seg s-text" id="seg-text"><div class="st"><b>代码段 .text</b></div><span>CPU 执行的机器指令（只读）— AOT 是程序本身；纯解释 / JIT 这里是解释器·VM 本体</span></div>
+          <div class="vend">低地址</div>
+        </div>
+        <div class="vmid"><span>OS：分页</span><i>→</i><span>虚拟地址 → 物理地址</span></div>
+        <div class="hw">
+          <div class="hwbox"><b>CPU</b><small>取指 → 译码 → 执行 → 访存 → 写回</small></div>
+          <div class="hwbox"><b>物理内存 RAM</b><small>按页帧存放代码与数据</small></div>
+          <div class="hwnote">对应树里最底层的「CPU · 内存」。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="infoCard"><button class="x" id="icClose" aria-label="关闭">×</button><h3 id="icTitle"></h3><div class="yr2" id="icYear"></div><div class="icbody" id="icDesc"></div></div>
+
+<script>
+(function(){
+  const board=document.getElementById('board'), svg=document.getElementById('branches');
+  // ── 重点节点的细分：点节点，讲解卡里以两列网格全部列出（不滚动）。后续往 SUBS 加节点即可 ──
+  const SUBS={
+    os:[['Linux 的由来','**Unix** 思想影响 + **Minix** 开发背景 + **C** 实现语言 → **Linux**（1991 Torvalds）；Windows / macOS 不展开'],
+        ['进程 / 线程','进程=资源分配单位(独立地址空间)；线程=调度单位(共享进程内存)'],
+        ['文件系统','把磁盘抽象成「文件+目录」树：inode、页缓存、VFS 统一接口'],
+        ['进程通信 IPC','管道/消息队列/共享内存/socket——进程隔离，通信由内核牵线'],
+        ['信号量 / 锁','并发同步原语：互斥锁、信号量、条件变量，解决竞态与临界区'],
+        ['进程调度','决定谁上 CPU：时间片轮转、优先级、Linux CFS'],
+        ['虚拟内存 / 分页','每进程独立虚拟地址空间，MMU 分页翻译到物理内存'],
+        ['系统调用','用户态→内核态的受控入口(read/write/fork…)，trap 触发'],
+        ['中断 / 异常','硬件中断、缺页异常、信号——打断 CPU 去处理事件']],
+    attn:[['缩放点积注意力','softmax(QKᵀ/√d)·V；除以 √d 防点积过大、梯度消失'],
+        ['多头注意力','Q/K/V 投影成多组并行做注意力，各头学不同关系再拼接'],
+        ['自注意力','Q/K/V 都来自同一序列，让每个位置看全序列'],
+        ['交叉注意力','Q 来自解码器、K/V 来自编码器，解码时回看输入'],
+        ['掩码注意力','解码器自回归时遮住未来位置，只能看已生成的'],
+        ['位置编码','注意力本身无序，需注入位置信息：绝对(正弦/可学习) vs 相对(RoPE 等)，详见 Transformer 周围的「位置编码·RoPE」组件']],
+    middleware:[['数据库','持久化存储+查询：MySQL/PG(关系)、Redis(KV)、MongoDB(文档)。靠文件系统存数据、靠网络收请求。**加插件就跨进 AI**：PG 的 pgvector、ES 向量检索 → 右树「向量数据库」'],
+        ['消息队列 MQ','异步解耦+削峰：Kafka/RabbitMQ/RocketMQ。靠文件系统/VFS 做持久化、靠网络投递'],
+        ['缓存','把热数据放内存换速度：Redis/Memcached；旁路/读写穿透、过期与淘汰'],
+        ['Web 服务器/框架','收 HTTP 请求跑业务：Nginx(反代/静态)、Spring/Express(框架)。监听 socket、多路复用'],
+        ['搜索引擎','倒排索引做全文检索：Elasticsearch/Lucene'],
+        ['对象存储','海量非结构化文件：S3/MinIO；最终一致、按 key 取'],
+      ],
+    simd:[['向量寄存器','一个寄存器装多个数(256bit 装 8 个 float)，一条指令同时算'],
+        ['AVX / AVX2 / AVX-512','x86 的向量指令集，宽度 128→256→512bit 逐代加宽'],
+        ['ARM NEON / SVE','ARM 的向量扩展；SVE 可变长向量'],
+        ['数据对齐','向量 load/store 要按边界对齐，否则变慢或出错'],
+        ['向量化编译','编译器自动把循环转成向量指令(auto-vectorization)'],
+        ['OpenMP / MPI','并行编程：OpenMP 共享内存多线程、MPI 多机消息传递'],
+        ['GPU Warp / CUDA','GPU 以 warp(32 线程)为单位 SIMT 执行；CUDA 是编程模型'],
+        ['Tensor Core','GPU 里专做小矩阵乘加的单元，深度学习训练主力'],
+        ['cuDNN','NVIDIA 的深度学习算子库：卷积/池化/RNN/注意力等被高度优化。位置在 CUDA 之上、PyTorch/TF 框架之下——框架调它，它调 Tensor Core'],
+        ['GEMM 通用矩阵乘','C=A×B 的高度优化实现，几乎所有神经网络计算的底座'],
+      ],
+    gen:[['GAN (2014)','生成器 vs 判别器对抗训练，图像生成的开山路线'],
+        ['VAE','变分自编码器：学一个隐空间，采样即生成'],
+        ['Diffusion (2020)','逐步去噪生成，现代图像/视频主力(Stable Diffusion/DALL·E)'],
+        ['扩散+Transformer','DiT/Sora：扩散骨架换成 Transformer'],
+      ],
+    rl:[['试错 + 奖励','智能体在环境里行动拿奖励，学最优策略(马尔可夫决策过程)'],
+        ['Q-learning / 策略梯度','价值法 vs 策略法两大家'],
+        ['AlphaGo (2016)','深度学习 + 蒙特卡洛树搜索 + 自我对弈，击败围棋顶尖'],
+        ['RLHF','用人类偏好当奖励微调大模型，ChatGPT 的关键一步'],
+      ],
+    cnn:[['LeNet (1989)','LeCun 手写数字识别，CNN 的奠基作'],
+        ['AlexNet (2012)','GPU 训练在 ImageNet 夺冠，深度学习引爆点'],
+        ['ResNet (2015)','残差连接让网络能堆到上百层，解决深层退化'],
+        ['ViT (2020)','把图像切块喂 Transformer，CV 进入 Transformer 时代'],
+      ],
+    gpt:[['GPT-3 (2020)','1750 亿参数，少样本涌现，大模型时代的里程碑'],
+        ['InstructGPT / ChatGPT (2022)','指令微调 + RLHF 对齐人类偏好，引爆应用'],
+        ['Llama (2023)','Meta 开放权重，点燃开源大模型生态'],
+        ['RAG (2023)','检索增强：模型 + 外部知识库，缓解幻觉、补时效'],
+      ],
+    jev:[['Choice','从预定义选项里选一个（≤255）——分类 / 路由 / 选择动作'],
+        ['Score','按 2~10 档打分——优先级 / 质量 / 匹配度'],
+        ['Noul','返回 yes 的概率值——阈值判断 / 置信度'],
+        ['典型场景','内容审核风控 · 工单分拣路由 · 销售线索打分 · UI 自动化测试 · 实时控制(~10 次/秒玩 Doom)'],
+        ['为什么不是第三架构','架构(TypeSafe)未公开；独特性在**判断接口**而非 Transformer 结构创新'],
+        ['为什么和 vLLM 不搭','vLLM/KV Cache 优化的是**自回归生成**；Jev 一次前向出结果、不自回归'],
+        ['谁能用','任何能把问题拆成 Choice/Score/Noul 的程序都能调 API——「智能 if」，不止 Agent'],
+      ],
+    web:[['HTML / CSS','声明式数据：HTML→DOM、CSS→CSSOM，被解析不是执行'],
+        ['JavaScript','前端唯一被执行的语言，跑在浏览器 V8(字节码+JIT)'],
+        ['Vue / React','框架：模板/JSX 构建期编译成 JS，运行时还是 V8 跑'],
+        ['浏览器渲染管线','解析 → 样式 → 布局 → 绘制 → 合成 → GPU → 显示器'],
+        ['DOM / CSSOM','页面的内存表示；JS 改它触发重排/重绘'],
+        ['Node.js','同一个 V8 搬到服务端，JS 也能写后端'],
+      ],
+    wordvec:[['n-gram 语言模型','统计前 n-1 个词预测下一词；稀疏、不懂语义、长距离失效'],
+        ['词袋 BoW','把文档当成词的无序集合，只数词频、丢语序'],
+        ['独热编码 one-hot','每个词一个维度，互相正交——维度爆炸、近义词也毫无关系'],
+        ['TF-IDF','按词频×逆文档频率加权，比纯词袋更能突出关键词'],
+      ],
+    w2v:[['skip-gram','用中心词预测上下文，稀有词学得好'],
+        ['CBOW','用上下文预测中心词，快'],
+        ['负采样','只更新少量负例，训练提速的关键技巧'],
+        ['向量算术','king − man + woman ≈ queen，关系编码成方向'],
+      ],
+    embed:[['静态 vs 上下文','静态(Word2Vec/GloVe)一词一向量；上下文(ELMo/BERT)随句子变'],
+        ['GloVe / fastText','其它静态词嵌入；fastText 用子词解决未登录词'],
+        ['上下文嵌入 (ELMo/BERT)','一词随上下文变向量，补上一词多义'],
+        ['Transformer 嵌入层','现代大模型的输入第一层就是嵌入表 + 位置编码'],
+      ],
+  };
+  const boxes=[...board.querySelectorAll('.box[data-id]')];
+  const byId={}; boxes.forEach(b=>byId[b.dataset.id]=b);
+  const parentOf=id=>byId[id]?.dataset.parent;
+  const yearOf=id=>+byId[id]?.dataset.year;
+  // 谁有孩子 → 可收起
+  const kids={}; boxes.forEach(b=>{const p=b.dataset.parent;if(p&&p!=='__root'){(kids[p]=kids[p]||[]).push(b.dataset.id);}});
+  const years=[...new Set(boxes.map(b=>+b.dataset.year))].sort((a,b)=>a-b);
+  const MINY=years[0], MAXY=years[years.length-1];
+  const collapsed=new Set();
+  let current=MAXY, timer=null;
+
+  // 有孩子的标 .collapsible（折叠改点「＋N」徽标，见 render）
+  Object.keys(kids).forEach(id=>{ byId[id]?.classList.add('collapsible'); });
+
+  // 关联链：child→parent（data-parent）+ 树冠 agent 的几路汇入。悬停/点击时，把这条链的棕线提到卡片之上显示。
+  const deps={}, feeds={};
+  const addEdge=(x,y)=>{ if(!byId[x]||!byId[y])return; (deps[x]=deps[x]||new Set()).add(y); (feeds[y]=feeds[y]||new Set()).add(x); };
+  boxes.forEach(b=>{const p=b.dataset.parent; if(p&&p!=='__root') addEdge(b.dataset.id,p);});
+  ['langs','cloud','os','infer','jev'].forEach(id=>addEdge('agent',id));
+  addEdge('infer','transformer'); // 部署推理 ⇢ 服务各 Transformer 模型
+  addEdge('infer','gpu');         // 部署推理 ⇢ 跑在 GPU 上（推理算力）
+  addEdge('mm','transformer');    // 多模态 ⇢ 跨架构能力（点线虚连）
+  addEdge('jev','transformer');   // Jev ⇢ 封装自某 Transformer 变体（架构未公开，点线虚连）
+  addEdge('dl','gpu'); // 跨树算力线：深度学习 ⇢ 共享地基的 GPU
+  addEdge('langs','cpp'); // 实现线：高级语言生态 ⇢ C/C++（解释器/VM 用 C/C++ 写）
+  addEdge('middleware','os'); // 依赖线：后端中间件 ⇢ 操作系统（文件系统/VFS/网络/并发）
+  addEdge('percep','nn'); // 思想源头线：感知机 ⇠ 人工神经元（中途接入，不占主干）
+  addEdge('transformer','embed'); // 输入线：Transformer ⇠ 词嵌入（输入第一层就是嵌入表）
+  function lineage(id){ const s=new Set([id]);
+    const walk=(start,m)=>{const st=[start];while(st.length){const n=st.pop();(m[n]||new Set()).forEach(k=>{if(!s.has(k)){s.add(k);st.push(k);}});}};
+    walk(id,deps); walk(id,feeds); return s; }
+  let litSet=null, pinnedId=null, downSet=null;
+  let brLit=false, compilerCardOpen=false; // 编译器桥牌：悬停/卡片打开时高亮跨树桥线
+  const setLit=s=>{ litSet=s; drawBranches(); };
+  // 结构邻接（只用 data-parent 的父子边，不含树冠/跨树桥）→ 悬停高亮整个连通分支（整棵树+旁系）
+  const sadj={}; boxes.forEach(b=>{const p=b.dataset.parent; if(p&&p!=='__root'&&byId[p]){ (sadj[b.dataset.id]=sadj[b.dataset.id]||new Set()).add(p); (sadj[p]=sadj[p]||new Set()).add(b.dataset.id);} });
+  if(byId['nn']&&byId['percep']){ (sadj['nn']=sadj['nn']||new Set()).add('percep'); (sadj['percep']=sadj['percep']||new Set()).add('nn'); } // 人工神经元并入连接主义连通分支
+  if(byId['embed']&&byId['transformer']){ (sadj['embed']=sadj['embed']||new Set()).add('transformer'); (sadj['transformer']=sadj['transformer']||new Set()).add('embed'); } // 词嵌入⇢Transformer 并入连通
+  const agentCalls=['langs','cloud','os','infer','jev']; // Agent 虚线调用的对象（非结构主干，不并入各自子树）
+  function component(id){ const s=new Set(),st=[id]; while(st.length){const n=st.pop(); if(s.has(n))continue; s.add(n); (sadj[n]||new Set()).forEach(k=>{if(!s.has(k))st.push(k);}); }
+    if(id==='agent') agentCalls.forEach(k=>{ if(byId[k]) s.add(k); }); // 悬停 Agent：只点亮调用线与目标盒，不扩散到左右两棵树
+    if(id==='infer') ['transformer','gpu','agent'].forEach(k=>{ if(byId[k]) s.add(k); }); // 悬停 部署推理：只点亮 服务/算力/被调用 三条线
+    if(id==='transformer') ['tf_pos','tf_ffn','tf_out','tf_an'].forEach(k=>s.add(k)); // 悬停 Transformer：连带点亮内部结构组件的连线
+    if(id==='jev') ['transformer','agent'].forEach(k=>{ if(byId[k]) s.add(k); }); // 悬停 Jev：点亮 封装自Transformer / 被Agent调用 两条线
+    return s; }
+  // 下游 = 建立在它之上/被它影响的后续技术（沿 feeds 向上游走）
+  function downstream(id){ const s=new Set([id]),st=[id]; while(st.length){const n=st.pop(); (feeds[n]||new Set()).forEach(k=>{if(!s.has(k)){s.add(k);st.push(k);}});} return s; }
+  const isDown=(a,b)=>!!downSet && downSet.has(a) && downSet.has(b);
+
+  // 每个节点的讲解：它解决了什么问题（钉住节点时弹讲解卡）
+  const DESC={
+    agent:'**Harness·Loop**：一圈工程脚手架，把 **LLM**（大脑）和 Planning / Memory / Tools（含 MCP）/ Runtime / State / Feedback / Security 编排成「感知-规划-执行-反馈」闭环。它不长在哪棵树上，而是**虚线调用**两棵树的成果——**语言**（harness 与工具链多用 **Python**，Java/Go 也行）、云·工程与操作系统给它运行环境，**部署好的模型**（经模型部署与推理工程：KV Cache / 量化 / vLLM）给它大脑。',
+    native:'**编译原生(AOT)**：编译期直接生成机器码，不进 VM。进程就是程序本身。Rust 走 LLVM、Go 自研后端，都不经过 C。',
+    interp:'**字节码+纯解释**：源码先编成字节码，解释器（本身是个 AOT 编好的原生程序）用 switch 把每条字节码分派到对应处理代码——这些代码用 C 写、**构建解释器时就已编成机器码**。CPython 经典无 JIT：字节码只是被读取的**数据**，运行期不产生新机器码，CPU 跑的始终是解释器自带的那份现成机器码。',
+    jvm:'**字节码+解释+JIT**：同样先编字节码、解释器执行，但**热点**会被 JIT 编成机器码缓存起来直接跑。Java(HotSpot：解释器+C1+C2)、JS(V8)、PyPy 都走这条。和「纯解释」唯一的区别就是 JIT。',
+    langs:'站在操作系统之上的高级语言世界。真正的轴不是「解释 vs 编译」，而是分发物（源码/字节码/机器码）× 运行时是否 JIT：编译原生 / 字节码·纯解释 / 字节码·解释+JIT。**运行于**操作系统（实线主干）；它们的**解释器/VM 多用 C/C++ 写**（虚线「实现于」→ C/C++）。',
+    os:'管 CPU、内存、文件、网络和权限，把裸硬件包装成进程能用的服务。内核多用 **C** 写成。**Linux**（1991，Torvalds）＝ **Unix** 的设计思想 + **Minix** 的开发背景启发 + **C** 语言实现；Windows / macOS 同为主流内核，这里不展开。',
+    net:'**网络 · TCP/IP**：操作系统提供的网络栈——**Socket** 接口、**TCP/UDP/IP** 协议、**DNS** 域名解析。它是**分布式系统、云计算、以及 Agent 调用外部工具/API** 的通信底座：跨机器通信、服务调用、RPC 全靠它。没有它，上层的分布式与远程调用都无从谈起。',
+    middleware:'**后端中间件**：用高级语言写出来的系统软件——数据库、消息队列、缓存、Web 服务器。一头**用语言构建**（虚线连高级语言生态），一头**重度依赖操作系统**（虚线连 OS：文件系统/VFS 存数据、网络收发、进程/线程并发）。点开「细分」看各类。',
+    distsys:'**分布式系统**（工程范式，不是某个软件）：把单机中间件**连成集群**解决单机扛不住的规模与可用性。核心难题——**共识**(Raft/Paxos 让多机对状态达成一致)、**复制**(多副本)、**分区**(数据分片)、**CAP**(一致性/可用性/分区容忍三选二)。单机数据库→分布式数据库、单机 MQ→分布式 MQ 都是这一跃。',
+    cloud:'**云计算**：建在 **虚拟化**（VM 虚拟机 / 容器 Docker-K8s，把一台机器切成很多份）+ **分布式系统** 之上的弹性平台。按需取用、IaaS/PaaS/SaaS 三层。虚拟化本身也依赖操作系统的隔离能力（namespace/cgroup）。',
+    cc:'系统编程的根语言：操作系统、数据库、编译器本身多由它写成。GCC/Clang 把它编成机器码。',
+    cpp:'**C++ 是 C 的近似超集 / 兄弟**，不是「建在 C 之上」——现代 C++ 直接编成机器码、也能写内联汇编，**不经过 C**（最早 1979 cfront 才转译成 C）；与 C 共享 ABI、能互调。在 C 基础上加面向对象：封装＝类把数据和方法包在一起并控制访问；继承＝子类复用扩展父类；多态＝虚函数运行期动态绑定。再加模板泛型与 RAII、零开销抽象。<b>很多语言的运行时就用 C++ 写（V8、JVM）。</b>',
+    asm:'直接对着 ISA 写的**助记符**——给每条机器指令起的人类可读名字（MOV / ADD / JMP），汇编器一对一翻成机器码。所有高级语言的终点站。',
+    x86:'**CISC**（复杂指令集）：一条指令在 CPU 内部完成很多操作、指令长短不一，可以直接操作内存——写汇编的人轻松了，CPU 的解码与执行压力变大。Intel/AMD 背着兼容包袱走到今天：现代 x86 外面是 CISC 壳，内部拆成 RISC 微操作（μops）执行。',
+    arm:'**RISC**（精简指令集）：一条指令只干一件事、定长编码、只有取数/存数指令碰内存——CPU 解码简单、好流水线、能提主频，复杂度交给编译器。ARM 靠它低功耗起家，从手机一路打进服务器和桌面。',
+    riscv:'开源免授权的 **RISC** 指令集，2010 年伯克利发起，谁都能照着造 CPU。',
+    isa:'硬件与软件的契约：**指令集**定义指令、寄存器、寻址。每条指令 = **操作码**（干什么）+ **操作数**（对谁干），在机器里就是一串 0 和 1 的二进制编码——人直接写 0101 根本记不住，这才催生了用助记符的汇编（1940 年代，年份不必太精确）。指令集思想跟 1940s 第一批存储程序机同生；1964 年 IBM S/360 才第一次把它定成跨机型不变的「架构」，ISA 这个词由此而来。',
+    wordvec:'**NLP 文本表示（统计起点）**：怎么把「词/文本」变成能算的向量，NLP 一条主线的**早期统计阶段**（深度学习之前），所以挂机器学习下、和深度学习并列。细分：n-gram / 词袋 / 独热 / TF-IDF——共同毛病是**稀疏、正交、丢语义**。往上就是神经时代的 Word2Vec → 词嵌入。',
+    w2v:'**Word2Vec（2013 · Mikolov）**：神经时代的转折点——用一个浅层网络(skip-gram/CBOW)把词学成**稠密向量**，语义相近的词在空间里挨着，`king−man+woman≈queen` 让「关系可做算术」出圈。NLP 从「稀疏符号」正式进入「分布式表示」。点细分看 skip-gram/负采样。',
+    embed:'**词嵌入 Embedding**：Word2Vec 之后沉淀下来的**通用概念**——把离散的词/token 映射成稠密向量。静态嵌入(Word2Vec/GloVe)一词一向量；上下文嵌入(ELMo/BERT)让一个词随句子变向量、解决一词多义。**现代 Transformer 的输入第一层就是嵌入表**，所以这条表示线最终汇进 Transformer。',
+    vecdb:'**向量数据库**：把 Embedding 存起来、按**相似度**检索（ANN 近邻搜索），是 **RAG** 的记忆底座。它处处是「传统→AI」的**桥**：**传统库加插件就能存向量**——PostgreSQL 的 **pgvector**、Elasticsearch 的向量检索、MySQL 也在跟进；另一路是**纯向量库** **Qdrant / Milvus / Pinecone**。所以它一头接左树的**后端数据库/中间件**，一头喂给 **Embedding → RAG → Agent 的 Memory**——传统数据工程与 AI 在这里接上。',
+    web:'**前端 · Web**：用 JavaScript 在**浏览器**里构建界面，是 JS 最大的应用方向。HTML/CSS 是**声明式数据**(被解析成 DOM/CSSOM，不是执行)、只有 **JS 被执行**(浏览器 V8，字节码+JIT)；**Vue/React 构建期编译成 JS**。进程是浏览器(原生 C++ 程序)，经渲染管线 → GPU → 显示器输出。细分看完整栈；底部嵌入的运行图有「前端·浏览器」交互 tab。',
+    simd:'**SIMD（单指令多数据）**：一条指令同时对一排数据做同样运算——CPU 回答「怎么同时处理更多数据」的第一步，向量寄存器一次算 8/16 个。往右演化成 **SIMT**（GPU 的单指令多线程）。**这是计算机树与 AI 树之间的桥**：深度学习的核心是矩阵乘法 **C(m×n)=A(m×k)×B(k×n)**，其中海量元素可并行——正是 SIMD / GPU / Tensor Core 的用武之地。点「细分」看 向量寄存器 / AVX / NEON / CUDA / GEMM。',
+    gen:'**生成式模型**：不是判别「是什么」，而是**生成新样本**——和 Transformer 并行的一条大路线。GAN(2014,对抗)→VAE→Diffusion(2020,去噪生成) 是主线，现代图像/视频(Stable Diffusion/Sora)都在这。点细分看各路线。',
+    rl:'**强化学习**：机器学习的**三大范式之一**（监督 / 无监督 / 强化）——智能体在环境里**试错、拿奖励、学策略**，源头在机器学习、不是深度学习的子集。当它用上深度网络就成了「**深度强化学习**」(虚线连深度学习)：AlphaGo(2016) 深度 RL 下赢围棋、**RLHF** 用它把大模型对齐人类偏好(ChatGPT 关键一步)。点细分看 Q-learning/AlphaGo/RLHF。',
+    simt:'**SIMT（单指令多线程）**：GPU 的执行模型——成千上万线程跑同一段代码、各处理不同数据（warp = 32 线程一组）。把 SIMD 的「一指令多数据」推到「一指令多线程」，于是有了 GPU 的大规模并行；再上去就是 Tensor Core → 深度学习训练。',
+    cpu:'存储程序思想的落地。**经典五级流水（示意）**：**取指(IF) → 译码(ID) → 执行(EX) → 访存(MEM) → 写回(WB)**——取指令、解出操作码+操作数、ALU 运算、读写内存、把结果写回寄存器；**这只是教科书示意，现代 CPU 多为更深流水 + 超标量，并非都是五级**。**通用**处理器，灵活性最高（也有 **流水线 / 超标量 / 乱序执行 / SIMD / 多核 / SMT** 等多种并行与提速机制，只是与 GPU 的吞吐导向设计目标不同），是算力谱系的起点。两棵树共用的地基。',
+    reg:'**寄存器**：CPU 内部极小极快的存储（几十个、纳秒级），ALU 直接操作的就是它——指令里的操作数、中间结果都放这里。存储层级的最顶端（最快最小）。',
+    cache:'**Cache 多级缓存**：CPU 与内存速度差上百倍，用 **L1/L2/L3**（越靠近 CPU 越小越快）缓存热点数据，靠**局部性**命中；未命中就逐级往下取。填补「寄存器 ↔ 内存」之间的速度鸿沟。',
+    mmu:'**MMU 内存管理单元**：把进程看到的**虚拟地址**翻译成**物理地址**（查页表、TLB 加速），实现每进程独立地址空间与隔离——这正是操作系统「虚拟内存/分页」能力的硬件支撑。**现代 CPU 把它片上集成**，但职责在 **CPU↔内存**的地址通路上，故画在两者之间的总线上、而非塞进 CPU 内部。',
+    dram:'**DRAM 动态随机存储**：一位用一个电容存，会漏电所以要**定期刷新**；密度高、成本低，是**主存**的主力。断电即失（易失）。与 Cache 用的 **SRAM**（静态、更快更贵、不用刷新）相对。',
+    ddr:'**DDR SDRAM**：主存与 CPU 之间的**接口标准**——同步时钟、一个时钟周期传两次数据（Double Data Rate）。代际 DDR3 → DDR4 → **DDR5** 带宽逐代翻番。俗称的「内存条」就是它。',
+    vram:'**显存**：GPU 专用的高带宽内存——**GDDR**（显卡）/ **HBM**（AI 加速卡的堆叠式显存，带宽极高）。深度学习训练吃的就是**显存容量 + 带宽**：模型放不下显存就跑不动，这也是算力卡的核心卖点之一。',
+    mem:'主存（RAM）：存放运行中的指令和数据，CPU 直接按地址寻址。进程的虚拟地址最终落到这里的物理页。',
+    periph:'硬盘、键鼠、显卡、网卡……通过驱动和中断接进系统。',
+    gpu:'1999 年 GeForce 256 起的大规模并行：几千个核同时做矩阵运算。深度学习的算力来源（AlexNet 靠它训出），两棵树的硬件交点。比 CPU 专、比 ASIC 灵活。GPU/FPGA/ASIC 都不在冯诺依曼核心里，而是挂在总线上的**协处理器**：CPU 负责调度，把矩阵运算这类重活派给它们。',
+    fpga:'现场可编程门阵列：硬件逻辑可**重新编程**，半定制。灵活性和效率都介于 GPU 与 ASIC 之间；需直接和外部 DDR 换数据，内存接口不如 GPU。',
+    asic:'专用集成电路：为特定算子**固化电路**，效率最高、灵活性最低。概念 1980s 就有，深度学习让它站上主舞台——**TPU / NPU 都是 ASIC**。',
+    tpu:'谷歌 2016 年为张量运算定制的 **ASIC**：脉动阵列做矩阵乘，数据中心里训练/推理的能效远超通用 GPU。',
+    npu:'端侧的神经网络处理单元（也是 **ASIC**）：2017 年起进手机 SoC（苹果 Neural Engine、华为麒麟 970），模型在设备本地跑推理——隐私、离线、低延迟。',
+    infer:'**模型部署与推理工程**：把训好的模型跑快跑省的**正交工程层**——**KV Cache**（缓存历史 K/V 不重算）、**批处理**（continuous batching 拼多请求）、**量化**（INT8/4 压显存）、**vLLM/推理引擎**（PagedAttention 等）。它**不属于某个模型**，而是**适用于各种 Transformer 模型**（故虚线 ⇢ 服务模型）；跑在 **GPU** 上（⇢ 算力）；**Agent 调用的正是部署后的模型**（⇢ 给 Agent 提供大脑）。',
+    enc:'**仅编码器（Encoder-only）**：只用 Transformer 的编码器，双向看整句做**理解**（分类/抽取/检索），不自回归生成。代表 BERT(NLP)、ViT(CV)。',
+    encdec:'**编码器-解码器（Encoder-Decoder）**：编码器读输入、解码器生成输出，天生适合**序列到序列**（翻译/摘要/语音转写）。代表 T5(NLP)、Whisper(ASR)。',
+    gpt:'**仅解码器（Decoder-only）**：只用解码器、自回归逐词生成。Scaling 之后涌现通用能力，成了现代大模型（LLM）的正统架构。往上按**发布·许可**分**开源**（Llama/Qwen/DeepSeek）/ **闭源**（GPT/Claude/Gemini）两支——这是许可维度、不是技术演进。',
+    oss:'**开源大模型**：权重公开可自部署——Llama、Qwen、DeepSeek。微调与私有化生态都长在它上面。都是**仅解码器**架构；开源/闭源是**发布·许可**维度，不是架构差别。',
+    closed:'**闭源大模型**：只给 API 不给权重——GPT、Claude、Gemini。能力常领先但黑盒。同为**仅解码器**架构，差的是**许可**而非技术路线。',
+    jev:'**Jev＝把 Transformer 能力封装成「封闭式判断接口」的专用服务**，不做自回归生成，**不是** Transformer 第三条架构路线——底层 TypeSafe 架构**未公开**，外界只能推测（有人猜是编码器，因一次前向出全部结果），官方未确认。它的独特性在**产品形态与输出接口**：三个判断原语 **Choice**（从预定义选项选一个，≤255）、**Score**（2~10 档打分）、**Noul**（返回 yes 的概率）。任何能把问题拆成这几种形式的程序都能调它的 API（相当于**「智能 if 语句」**），**不止 Agent**：内容审核/风控、工单分拣路由、销售线索打分、UI 自动化测试、实时控制回路（官方演示过 ~10 次/秒决策玩 Doom）。它和 **vLLM / KV Cache 不在一个层面**——那是自回归生成的推理部署优化，Jev 根本不自回归、天然不搭。Agent 用它做**极速判断**（路由/校验/短路决策），只是众多使用者之一。',
+    mm:'**多模态 = 跨架构能力，不是第四种架构**：文本/图像/音频/视频进同一模型做跨模态对齐。它可以建在**任一架构**上——CLIP 是双编码器（**主要做图文对齐**）、GPT-4V/Gemini 是仅解码器、语音/视频多模态则另有专门模型。所以它和「仅编码器/编码器-解码器/仅解码器」**正交**，故浮动、点线虚连 Transformer，不占架构分类。',
+    vit:'**CV 的 Transformer 化**：把图像切成小块（patch）当「词」喂给 Transformer，证明注意力机制在视觉上也行——CV 从 CNN 时代迈入 Transformer 时代。',
+    whisper:'**ASR 的 Transformer 代表**：OpenAI 用 Transformer 做**大规模弱监督**训练的**多语言语音识别**模型（并非「一统」语音，只是该路线的代表作）。语音领域也被 Transformer 收编。',
+    transformer:'2017《Attention Is All You Need》：**不依赖循环与卷积**，全靠自注意力并行建模（论文是针对它自身架构这么说的）。两支后代各取一半。',
+    cnn:'卷积抽取局部特征。2012 年 AlexNet 用 GPU 训练在 ImageNet 夺冠，深度学习由此引爆。',
+    rnn:'循环结构处理序列：隐状态沿时间传递、BPTT 训练；步数一多梯度消失，长依赖学不动——LSTM 为此而来。Seq2Seq（2014）用两个 RNN 定下编码器-解码器范式。',
+    lstm:'1997：细胞状态 + 输入/遗忘/输出三个门，让梯度沿细胞状态近似恒等地流过长距离，长依赖问题大幅缓解。',
+    attn:'从 RNN 翻译模型（Seq2Seq）的定长向量瓶颈里长出：解码每步回头看整个输入、按相关度加权聚合。Transformer 把它扶正为唯一主角。',
+    dl:'机器学习的子集：学习器换成多层神经网络，特征从手工设计变成自动学习。多层网络 + 大数据 + GPU，2006 年起深层网络重新能训了。',
+    fp:'**前向传播**：输入沿网络**逐层计算**到输出（每层＝加权求和 + 激活函数）。推理时只需前向；训练时先前向算出预测，再由**反向传播**算梯度、更新权重。**前向 + 反向 = 一轮训练**。',
+    bp:'链式法则反向算梯度，让多层网络可训练。反传的思想更早（1960s–70s 已有雏形，如 Werbos 1974），**1986 年 Rumelhart、Hinton、Williams 的论文把它推广开**，神经网络从此真正可训——不是首次提出，而是奠定性的普及工作。',
+    ml:'从数据中学规律而非手写规则：监督 / 无监督 / 强化，决策树、SVM 等经典模型。深度学习就是从这里长出的一支——学习器换成了深层网络。',
+    sym:'**符号主义**：AI 两大早期路线之一——用逻辑、搜索、规划、知识表示、专家系统去「符号地」推理。1956 年达特茅斯会议的主角，统治 AI 前三十年，遇到知识获取瓶颈后式微，部分思想后与学习路线合流。和连接主义**并行发展**，不是从神经网络派生。',
+    conn:'**连接主义**：AI 两大早期路线之一——不写规则，而是用大量「人工神经元」连成网络、从数据里学。源头在**神经科学**（神经元怎么放电），McCulloch-Pitts(1943)→感知机(1958)→反向传播(1986)→深度学习，就是这一脉。和符号主义**并行**，各有源头。',
+    nn:'**人工神经元（1943 · McCulloch-Pitts）**：用阈值逻辑模拟神经元的「全或无」激发。它**来自神经科学、不是图灵机理论的后代**，所以树上把它画成琥珀色的「**思想源头**」——不在主干上，而是**中途用虚线接进来**：1958 年感知机采纳了这个想法，连接主义才有了可训练的模型。',
+    percep:'**感知机（1958 · Rosenblatt）**：第一个能从数据**训练**权重的神经网络模型——连接主义从「模型」走向「可学习」。单层感知机学不了异或(XOR)，一度被打入冷宫，直到多层 + 反向传播(1986) 才复兴成多层感知机(MLP)。',
+    expert:'**专家系统**：符号主义的高峰——把领域专家知识写成「规则库 + 推理机」(如 MYCIN 诊断)。1980s 商业火过一阵，但知识靠人工录入、难维护、不会自学，撞上「知识获取瓶颈」后退潮。',
+    m4:'香农 1948：用熵度量信息。交叉熵损失、压缩与通信的共同语言。',
+    __turing:'1936 年一篇论文定义了「可计算」，图灵机成为计算机的数学蓝图；1950 年又问出「机器能思考吗」——所以把它当**两棵树最具象征性的种子**。但他**不是所有理论的唯一祖先**：体系结构有**冯诺依曼**、信息论有**香农**、可计算性还有**哥德尔/丘奇**、符号主义源于**逻辑学**、连接主义源于**神经科学**——这些共同根系都在下方的「土壤」里。图灵是其中一颗种子，不是唯一。'
+  };
+  // 卡片内「迷你树」：主图不再加节点，深层分类沉到讲解卡里（缩进树）。按节点 id 挂
+  const TREE={
+    ml:{ lead:'三大范式 · 按「有没有标签」分',
+      nodes:[
+        {t:'监督学习',d:'有标签',g:'sup',c:[
+          {t:'分类',d:'输出离散类别（猫/狗、垃圾邮件？）'},
+          {t:'回归',d:'输出连续数值（房价、温度）'}]},
+        {t:'无监督学习',d:'无标签·学结构',g:'unsup',c:[
+          {t:'聚类',d:'分组：K-means、层次聚类'},
+          {t:'降维',d:'压特征：PCA、t-SNE'},
+          {t:'密度 / 生成',d:'学分布采样：GMM、生成式'}]},
+        {t:'强化学习',d:'靠奖励试错',g:'rl',c:[
+          {t:'→ 见右树「强化学习」',d:'深度 RL · AlphaGo · RLHF'}]}
+      ],
+      foot:'每类任务配什么损失 → 点「反向传播」。' },
+    bp:{ lead:'反向传播差的是「对**损失**求梯度」——先选对损失',
+      nodes:[
+        {t:'监督 · 跟标签比',g:'sup',c:[
+          {t:'分类 → 交叉熵',d:'BCE / CE · 配 sigmoid/softmax（不用 MSE：会梯度消失）'},
+          {t:'回归 → MSE / MAE',d:'MSE·L2 / MAE·L1 / Huber 折中'}]},
+        {t:'无监督 · 跟自己比',g:'unsup',c:[
+          {t:'重构误差',d:'自编码器 / PCA · 用 MSE 还原'},
+          {t:'对比 / 似然',d:'InfoNCE · GMM · VAE=重构+KL'}]},
+        {t:'▼ 统一本质 ＝ 最大似然 / NLL',g:'core',c:[
+          {t:'高斯 → MSE'},{t:'拉普拉斯 → MAE'},{t:'类别 → 交叉熵'}]}
+      ],
+      foot:'注：K-means / 层次聚类有目标函数但不走反传。任务怎么分 → 点「机器学习」。' },
+    compiler:{ lead:'高层描述 → 编译器 → 硬件指令；左右两树在此汇合',
+      nodes:[
+        {t:'传统编译器',d:'→ CPU',g:'sup',c:[
+          {t:'GCC'},{t:'LLVM / Clang',d:'IR 枢纽'}]},
+        {t:'AI 编译器',d:'→ GPU/NPU',g:'unsup',c:[
+          {t:'CUDA'},{t:'XLA'},{t:'TVM'},{t:'CANN'}]},
+        {t:'▼ 后端共用 LLVM',g:'core',c:[
+          {t:'AI 编译器后端大量复用 LLVM → 详见底部「AI 工程栈」'}]}
+      ] },
+    fp:{ lead:'每层 ＝ 线性(加权求和 Wx+b) → **激活**(非线性)',
+      nodes:[
+        {t:'为什么要激活（非线性）',g:'core',c:[
+          {t:'没有它，叠 N 层线性仍等于一个线性层——激活才让网络能拟合复杂函数'}]},
+        {t:'隐藏层常用',g:'sup',c:[
+          {t:'ReLU 系',d:'ReLU / LeakyReLU / GELU / SwiGLU · 现代默认，快、缓解梯度消失'},
+          {t:'Sigmoid / Tanh',d:'早期用，两端饱和→梯度消失，隐藏层已少用'}]},
+        {t:'输出层按任务（配损失）',g:'unsup',c:[
+          {t:'Sigmoid',d:'二分类→概率 · 配 BCE'},
+          {t:'Softmax',d:'多分类→分布 · 配交叉熵'},
+          {t:'恒等 / 线性',d:'回归 · 直接输出 · 配 MSE'}]}
+      ],
+      foot:'输出层激活 + 损失成对 → 点「反向传播」看损失树。' }
+  };
+  const COMPILER_DESC='编译器把「高层写法」翻成「硬件能跑的指令」。传统编译器编到 CPU、AI 编译器编到 GPU/NPU，但后端**大量共用 LLVM**。详细机制与各 AI 编译器见页面底部「AI 工程栈」。';
+  const ic=document.getElementById('infoCard'),icT=document.getElementById('icTitle'),
+        icY=document.getElementById('icYear'),icD=document.getElementById('icDesc');
+  function hideInfo(){ ic.classList.remove('show'); ic.classList.remove('wide'); compilerCardOpen=false; }
+  // 讲解文案里 **词** = 重点词，渲染成加粗红字
+  const emph=s=>String(s).replace(/\*\*(.+?)\*\*/g,'<b class="em">$1</b>');
+  // 可视化看板小树：色块分支卡 + chip（ml/bp/compiler 共用）
+  function treeEl(T){
+    const chip=k=>'<div class="mt2-c"><b>'+k.t+'</b>'+(k.d?'<small>'+emph(k.d)+'</small>':'')+'</div>';
+    const branch=n=>'<div class="mt2-b '+(n.g||'')+'"><div class="mt2-h">'+emph(n.t)+(n.d?'<small>'+n.d+'</small>':'')+'</div><div class="mt2-chips">'+(n.c||[]).map(chip).join('')+'</div></div>';
+    const g=document.createElement('div'); g.className='mt2';
+    g.innerHTML=(T.lead?'<div class="mt2-lead">'+emph(T.lead)+'</div>':'')+T.nodes.map(branch).join('')+(T.foot?'<div class="mt2-foot">'+emph(T.foot)+'</div>':'');
+    return g;
+  }
+  function showInfoFor(id){
+    compilerCardOpen=false;
+    const el=byId[id]; if(!el) return;
+    icT.textContent=el.querySelector('b')?.textContent||id;
+    icY.textContent=el.dataset.year?el.dataset.year+' 年':'';
+    icD.innerHTML=emph(DESC[id]||el.querySelector('span,small')?.textContent||'');
+    if(SUBS[id]){
+      const g=document.createElement('div');
+      g.innerHTML = '<div class="sublabel2">细分重点（'+SUBS[id].length+'）</div><div class="subgrid">'
+        + SUBS[id].map(it=>'<div class="subitem"><b>'+it[0]+'</b><span>'+emph(it[1])+'</span></div>').join('') + '</div>';
+      icD.appendChild(g);
+      ic.classList.add('wide');
+    } else ic.classList.remove('wide');
+    if(TREE[id]){ icD.appendChild(treeEl(TREE[id])); ic.classList.add('wide'); }
+    ic.classList.add('show');
+  }
+  // 讲解卡可拖动（标题为把手）——避免挡住视野
+  (function(){ let on=false,sx,sy,sl,st;
+    icT.addEventListener('mousedown',e=>{ const r=ic.getBoundingClientRect();
+      ic.style.left=r.left+'px'; ic.style.top=r.top+'px'; ic.style.transform='none';
+      on=true; sx=e.clientX; sy=e.clientY; sl=r.left; st=r.top; e.preventDefault(); });
+    window.addEventListener('mousemove',e=>{ if(!on)return;
+      ic.style.left=(sl+e.clientX-sx)+'px'; ic.style.top=(st+e.clientY-sy)+'px'; });
+    window.addEventListener('mouseup',()=>{on=false;});
+  })();
+  document.getElementById('icClose').onclick=()=>{ pinnedId=null; downSet=null; setLit(null); hideInfo(); };
+  // 逐年生长 / 单步时：弹「这一年长出了什么」，列出当年新枝 + 讲解，手动关或被下一年顶掉
+  function showYearInfo(y){
+    compilerCardOpen=false;
+    const borns=boxes.filter(x=>+x.dataset.year===y && !hiddenByCollapse(x.dataset.id));
+    if(!borns.length){ hideInfo(); return; }
+    ic.classList.remove('wide');
+    if(y===MINY){ icT.textContent=y+' 年 · 第一枝'; icY.textContent='图灵 1936 播种后，树上长出的第一枝'; }
+    else { icT.textContent=y+' 年'; icY.textContent='这一年长出 '+borns.length+' 枝'; }
+    icD.innerHTML=borns.map(x=>{
+      const t=x.querySelector('b')?.textContent||x.dataset.id;
+      const d=DESC[x.dataset.id]||x.querySelector('span,small')?.textContent||'';
+      return '<div class="ic-item"><b>'+t+'</b> — '+emph(d)+'</div>';
+    }).join('');
+    ic.classList.add('show');
+  }
+  document.getElementById('rootbox').addEventListener('click',()=>{
+    pinnedId=null; compilerCardOpen=false; setLit(null);
+    icT.textContent='图灵　Alan Turing'; icY.textContent='1936 / 1950';
+    icD.textContent=DESC.__turing; ic.classList.remove('wide'); ic.classList.add('show');
+  });
+  boxes.forEach(b=>{
+    const id=b.dataset.id;
+    // 点节点本体 = 钉住那条线（滑动也不丢），再点取消；点「＋N」徽标归折叠
+    b.addEventListener('click',e=>{
+      if(e.target.closest('.fold')) return;
+      e.stopPropagation(); // 嵌套盒（ASIC 框里的 TPU/NPU）只触发最里层那个
+      if(b.classList.contains('hidden')||b.classList.contains('future')) return;
+      pinnedId=(pinnedId===id)?null:id;
+      downSet = pinnedId ? downstream(pinnedId) : null;   // 下游默认红线，无需点按钮
+      setLit(pinnedId?component(pinnedId):null);
+      pinnedId?showInfoFor(pinnedId):hideInfo();
+    });
+    // 悬停 = 整个连通分支（棕）+ 下游后续技术（红），已钉住时不抢
+    b.addEventListener('mouseenter',()=>{ if(pinnedId) return;
+      if(b.classList.contains('hidden')||b.classList.contains('future')) return;
+      downSet=downstream(id); setLit(component(id)); });
+    b.addEventListener('mouseleave',()=>{ if(pinnedId) return; downSet=null; setLit(null); });
+  });
+  board.addEventListener('click',e=>{ if(e.target.closest('.box')||e.target.closest('.tfmini')||e.target.closest('.brchip')) return;
+    if(pinnedId||compilerCardOpen){ pinnedId=null; downSet=null; compilerCardOpen=false; setLit(null); hideInfo(); }});
+  // 编译器桥牌：点开"传统⇄AI 编译器"看板卡；悬停/打开时高亮跨树桥线
+  function openCompilerCard(){
+    pinnedId=null; downSet=null; litSet=null; compilerCardOpen=true;
+    icT.textContent='编译器 · 传统 ⇄ AI'; icY.textContent='左右树的第三座桥';
+    icD.innerHTML=emph(COMPILER_DESC); icD.appendChild(treeEl(TREE.compiler));
+    ic.classList.add('wide'); ic.classList.add('show'); drawBranches();
+  }
+  const cmpChipEl=document.getElementById('compiler_chip');
+  if(cmpChipEl){
+    cmpChipEl.addEventListener('mouseenter',()=>{ brLit=true; drawBranches(); });
+    cmpChipEl.addEventListener('mouseleave',()=>{ brLit=false; drawBranches(); });
+    cmpChipEl.addEventListener('click',e=>{ e.stopPropagation(); openCompilerCard(); });
+  }
+  // Transformer 内部结构 3 张小卡：可点击弹讲解卡（它们不是 .box[data-id]，单独挂）
+  const TFINFO={
+    tf_pos:['位置编码 · RoPE','注意力本身**无序**，要给 token 注入位置。**RoPE 旋转位置编码**把位置编成**旋转角度**——用**欧拉公式** e^{iθ}=cosθ+i·sinθ 在复平面 / **极坐标**里旋转 Q、K 向量，两个 token 的位置差只体现为**相对夹角**。现代大模型(Llama 等)标配，是数学(复数/极坐标)→Transformer 的一座桥。'],
+    tf_ffn:['FFN 前馈网络','Transformer 每个 block 里、注意力之后的**逐位置前馈层**：两层全连接 + 激活(GELU/SwiGLU)，先升维再降维做非线性变换。**配合残差连接 + LayerNorm**(Add & Norm)稳住训练。多头注意力负责「看哪儿」，FFN 负责「想什么」。'],
+    tf_out:['输出头','Transformer 顶部的**输出投影层**(LM Head)：把最后一层隐向量映射回**词表大小**的 logits，softmax 得到下一个 token 的概率分布。解码器据此**自回归**逐词生成。<br><br>换句话说，**"生成一个 token" ＝ 在词表上做一次多分类**（类别数＝词表大小，几万~十几万）。所以训练就用**交叉熵**（＝最大似然 NLL，其 exp 即困惑度 **perplexity**）——这正是「分类→交叉熵」在现代 LLM 里的化身，点「反向传播」看损失树。注：这是**预训练 / SFT** 的目标；**对齐阶段 RLHF / DPO 换成偏好 / 奖励损失**，不再是对词表的交叉熵。'],
+    tf_an:['残差连接 + 层归一化','Transformer 每个子层(注意力、FFN)外都裹一层 **Add & Norm**：**残差连接**(x + 子层(x))让梯度直通、缓解深层退化；**LayerNorm** 对每个 token 的特征做归一化，稳住数值与训练。有了它，Transformer 才能堆到几十上百层。'],
+  };
+  ['tf_pos','tf_ffn','tf_out','tf_an'].forEach(id=>{const el=document.getElementById(id); if(!el)return; el.style.cursor='pointer';
+    el.addEventListener('click',e=>{ e.stopPropagation(); icT.textContent=TFINFO[id][0]; icY.textContent='Transformer 内部结构'; icD.innerHTML=emph(TFINFO[id][1]); ic.classList.remove('wide'); ic.classList.add('show'); });});
+
+  function hiddenByCollapse(id){ // 任一祖先被收起 → 藏
+    let p=parentOf(id);
+    while(p && p!=='__root'){ if(collapsed.has(p)) return true; p=parentOf(p); }
+    return false;
+  }
+  function visible(id){ return yearOf(id)<=current && !hiddenByCollapse(id); }
+
+  function render(){
+    boxes.forEach(b=>{
+      const id=b.dataset.id;
+      if(b.dataset.sub) return; // 细分子节点由 ⊕ 控制显隐，不参与年份逻辑
+      b.classList.toggle('future', yearOf(id)>current); // 未到年份：淡出但占位
+    });
+    // 无年份的装饰元素跟着锚点节点同年出现：冯诺依曼框→CPU(1945)、算力谱系注记→GPU(1999)、领域线图例→RNN(1986)
+    const gate=(sel,anchor)=>{const e=document.querySelector(sel); if(e&&byId[anchor]) e.classList.toggle('future', yearOf(anchor)>current);};
+    gate('.vonbox','cpu'); gate('.specnote','gpu'); gate('.dllegend','rnn'); gate('.infrabox','middleware'); gate('.flynnbox','simd'); gate('.xcut','gpt');
+    document.querySelectorAll('.tfmini').forEach(e=>e.classList.toggle('future', yearOf('transformer')>current));
+    // 钉住的节点被收起或还没长出来 → 解钉、收讲解卡
+    if(pinnedId && (hiddenByCollapse(pinnedId)||yearOf(pinnedId)>current)){ pinnedId=null; litSet=null; hideInfo(); }
+    // 量布局后画枝
+    requestAnimationFrame(drawBranches);
+    // 年份标签
+    document.getElementById('yrLabel').textContent = current>=MAXY ? '全' : current;
+    document.getElementById('slider').value = Math.round((current-MINY)/(MAXY-MINY)*100);
+  }
+
+  const center=el=>{const r=el.getBoundingClientRect(),b=board.getBoundingClientRect();
+    return {x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,top:r.top-b.top,bot:r.top-b.top+r.height,w:r.width};};
+  const rootAnchor=()=>{const r=document.querySelector('.rootbox').getBoundingClientRect(),b=board.getBoundingClientRect();
+    return {x:r.left-b.left+r.width/2,y:r.top-b.top};};
+
+  const LEAFC=['#7fb069','#9ccb7a','#6aa15a','#8cc06a'];
+  function leaf(x,y,d,s,ci){ // d=朝向(±1) s=大小 ci=色序
+    const c=LEAFC[ci%LEAFC.length];
+    return `<path d="M${x},${y} q${7*s*d},${-6*s} ${14*s*d},${-1*s} q${-5*s*d},${7*s} ${-14*s*d},${1*s} z" fill="${c}" opacity=".82"/>`;}
+  // 三次贝塞尔上取点（和画枝用的控制点一致）
+  function cubicPt(x1,y1,x2,y2,t){const my=(y1+y2)/2,m=1-t;
+    return [m*m*m*x1+3*m*m*t*x1+3*m*t*t*x2+t*t*t*x2, m*m*m*y1+3*m*m*t*my+3*m*t*t*my+t*t*t*y2];}
+  // 沿一根枝撒几片叶子
+  function leavesOn(x1,y1,x2,y2,k){let s='';const ts=[0.28,0.5,0.72,0.88];
+    ts.forEach((t,i)=>{const[px,py]=cubicPt(x1,y1,x2,y2,t);const d=(i%2?1:-1)*(x1<x2?1:-1);
+      s+=leaf(px,py,d,0.8+0.5*(1-t),k+i);});
+    return s;}
+
+  const svgTop=document.getElementById('branchesTop');
+  function drawBranches(){
+    const b=board.getBoundingClientRect();
+    [svg,svgTop].forEach(s=>{s.setAttribute('viewBox',`0 0 ${b.width} ${b.height}`);s.setAttribute('width',b.width);s.setAttribute('height',b.height);});
+    const root=rootAnchor();
+    let trunk='',twig='',leaves='',top='';
+    const live=el=>el && !el.classList.contains('hidden') && !el.classList.contains('future');
+    const isLit=(a,bb)=>!!litSet && litSet.has(a) && (bb==='__root' || litSet.has(bb));
+    // 提到卡片之上的那条线：同样是棕色，只是更粗、不透明、画在最上层，不被盒子挡住
+    const over=(d,thick)=>`<path d="${d}" stroke="#6b4522" stroke-width="${thick?8:5}" fill="none" stroke-linecap="round" opacity="1"/>`;
+    const overRed=(d,thick)=>`<path d="${d}" stroke="#c0392b" stroke-width="${thick?8:5}" fill="none" stroke-linecap="round" opacity="1"/>`;
+    const hl=(a,b,d,thick)=>{ if(isDown(a,b)) top+=overRed(d,thick); else if(isLit(a,b)) top+=over(d,thick); }; // 下游=红，其余连通分支=棕
+    // Transformer 内部结构：位置编码(左上)/FFN(右上)/残差&Norm(FFN上)/输出头(右)，各虚线连 Transformer，并随悬停加粗
+    const tfN=byId['transformer'];
+    if(live(tfN)){
+      const cc=center(tfN);
+      const pos=document.getElementById('tf_pos'), ffn=document.getElementById('tf_ffn'), out=document.getElementById('tf_out');
+      const dash=(sx,sy,tx,ty,cid)=>{const my=(sy+ty)/2;const d=`M${sx},${sy} C${sx},${my} ${tx},${my} ${tx},${ty}`;twig+=`<path d="${d}" stroke="#6f9a7e" stroke-width="1.8" fill="none" stroke-dasharray="4 3" opacity=".6"/>`;if(cid&&litSet&&litSet.has(cid)&&litSet.has('transformer'))top+=over(d,false);}; // 悬停 Transformer 时这几条组件连线加粗变棕（与血缘线一致）
+      if(pos){const pw=pos.offsetWidth,ph=pos.offsetHeight; const x=cc.x-cc.w/2-pw*0.15, y=cc.top-ph-20;
+        pos.style.left=x+'px'; pos.style.top=y+'px'; dash(x+pw*0.5, y+ph, cc.x-cc.w/2+70, cc.top+2,'tf_pos');}
+      let fX=0,fY=0,fW=0,fH=0;
+      if(ffn){fW=ffn.offsetWidth;fH=ffn.offsetHeight; fX=cc.x+cc.w/2-fW+14; fY=cc.top-fH-16;
+        ffn.style.left=fX+'px'; ffn.style.top=fY+'px'; dash(fX+fW/2, fY+fH, cc.x+cc.w/2-30, cc.top+2,'tf_ffn');}
+      const an=document.getElementById('tf_an');
+      if(an&&ffn){const aw=an.offsetWidth,ah=an.offsetHeight; const ax=fX+fW-aw, ay=fY-ah-12;
+        an.style.left=ax+'px'; an.style.top=ay+'px'; dash(ax+aw*0.25, ay+ah, cc.x+cc.w*0.15, cc.top,'tf_an');} // 连 Transformer 上方·中间偏右
+      if(out){const ow=out.offsetWidth,oh=out.offsetHeight; const x=cc.x+cc.w/2+16, y=cc.y-oh/2;
+        out.style.left=x+'px'; out.style.top=y+'px'; dash(x, y+oh/2, cc.x+cc.w/2+2, cc.y,'tf_out');}
+    }
+    // 关系类型配色：盒子色=哪棵树，线色=什么关系。演进谱系=默认棕树干；其余按类型上色
+    const REL={impl:{c:'#8a5fb0',dash:''},run:{c:'#3f7fb0',dash:''},spec:{c:'#9398a2',dash:'5 5'},use:{c:'#d08a3a',dash:'7 5'},infl:{c:'#8a6c40',dash:'6 5'}};
+    const relPath=(d,rel,thick)=>{const s=REL[rel];const w=thick?4.6:2.8;return `<path d="${d}" stroke="${s.c}" stroke-width="${w}" fill="none" stroke-linecap="round"${s.dash?` stroke-dasharray="${s.dash}"`:''} opacity=".85"/>`;};
+    boxes.forEach(el=>{
+      const id=el.dataset.id;
+      if(el.classList.contains('hidden')||el.classList.contains('future')) return;
+      if(el.dataset.sub) return; // 细分子节点在悬浮面板里，连线单独画（见下方 subPanels）
+      const accel=el.classList.contains('accel')||el.classList.contains('softdep'); // 虚线连父：算力加速器 / 后端中间件(用语言写,非结构主干)
+      const pid=el.dataset.parent; if(!pid) return;    // 树冠 agent 无 data-parent，单独画
+      const c=center(el);
+      let px,py,thick;
+      if(pid==='__root'){ px=root.x; py=root.y; thick=true; }
+      else{ const pe=byId[pid]; if(!pe||pe.classList.contains('hidden')||pe.classList.contains('future')) return;
+            if(pe.contains(el)) return; // 父框装着子盒（ASIC 框里的 TPU/NPU）：包含本身就是连线，不画
+            const pc=center(pe);
+            const ovTop=Math.max(c.top,pc.top), ovBot=Math.min(c.bot,pc.bot);
+            if(ovBot-ovTop>12){ // 同层（垂直区间有重叠）：横向短接，不往下绕（RNN→LSTM、C→C++、FPGA→ASIC框）
+              const toR=c.x>pc.x;
+              const sx=toR? c.x-c.w/2 : c.x+c.w/2, tx2=toR? pc.x+pc.w/2 : pc.x-pc.w/2;
+              const sy=(ovTop+ovBot)/2, ty=sy, mx=(sx+tx2)/2;
+              const d2=`M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx2},${ty}`;
+              const relS=el.dataset.rel;
+              if(relS&&REL[relS]) twig+=relPath(d2,relS,false);
+              else twig+=`<path d="${d2}" stroke="var(--bark2)" stroke-width="2.2" fill="none" opacity="${accel?'.6':'.72'}"${accel?' stroke-dasharray="6 4"':''}/>`;
+              hl(id,pid,d2,false);
+              return;
+            }
+            px=pc.x; py=pc.top; thick=el.classList.contains('hub')||el.classList.contains('thick'); }
+      const x1=c.x, y1=c.bot, x2=px, y2=py, my=(y1+y2)/2;
+      const d=`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+      // 有声明关系类型的边：按类型上色（实现=紫 / 运行依赖=蓝 / 规范=灰虚 / 使用=橙虚），不走棕树干
+      const relM=el.dataset.rel;
+      if(relM&&REL[relM]){ twig+=relPath(d,relM,thick); }
+      // 主干越靠近根越粗（下粗上细 + 竖向树皮渐变），近根段再加粗
+      else if(thick){const w=6+9*Math.max(y1,y2)/b.height+(pid==='__root'?4:0);
+        trunk+=`<path d="${d}" stroke="url(#barkG)" stroke-width="${w.toFixed(1)}" fill="none" stroke-linecap="round" opacity=".92"/><path d="${d}" stroke="var(--bark2)" stroke-width="${(w*0.38).toFixed(1)}" fill="none" stroke-linecap="round" opacity=".5"/>`;}
+      else { twig+=`<path d="${d}" stroke="var(--bark2)" stroke-width="2.2" fill="none" opacity="${accel?'.6':'.72'}"${accel?' stroke-dasharray="6 4"':''}/>`;
+             if(!accel) leaves+=leavesOn(x1,y1,x2,y2, (x1*7+y1)|0); }
+      hl(id,pid,d,thick);
+    });
+    // 树冠 Agent：不是从哪长出来，而是「调用」外部资源——虚线汇入 云/工程、操作系统、开源·闭源 LLM
+    const crown=byId['agent'];
+    if(live(crown)){
+      const cc=center(crown);
+      const calls=[['cloud','云·工程'],['langs','语言'],['os','系统'],['infer','模型·推理'],['jev','极速判断']];
+      calls.forEach(([id])=>{
+        const e=byId[id]; if(!live(e)) return;
+        const ec=center(e), x1=ec.x, y1=ec.top, x2=cc.x, y2=cc.bot, my=(y1+y2)/2;
+        const d=`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+        twig+=`<path d="${d}" stroke="#d08a3a" stroke-width="2.6" fill="none" stroke-dasharray="7 5" stroke-linecap="round" opacity=".75"/>`;
+        hl(id,'agent',d,true);
+      });
+      // 调用对象统一列在 Agent 框正下方，不再散落到各条线末端
+      const labs=calls.filter(([id])=>live(byId[id])).map(([,l])=>l).join('　·　');
+      twig+=`<text x="${cc.x}" y="${cc.bot+19}" font-size="11.5" fill="#7c5a33" font-weight="700" text-anchor="middle">${labs}</text>`;
+    }
+    // 模型部署与推理工程（正交工程层）：⇢ 服务各 Transformer 模型（蓝·运行依赖）、⇢ 跑在 GPU 上（橙·算力）。→ Agent 的调用线由树冠统一画
+    const infE=byId['infer'];
+    if(live(infE)){
+      const ic=center(infE);
+      const tfE2=byId['transformer'];
+      if(live(tfE2)){ const g=center(tfE2); const x1=ic.x+ic.w/2, y1=ic.bot, x2=g.x-g.w/2, y2=g.y, mx=(x1+x2)/2;   // infer(左侧) 右缘 → Transformer 左缘，斜线短连
+        const d=`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+        twig+=`<path d="${d}" stroke="#3f7fb0" stroke-width="2.4" fill="none" stroke-dasharray="6 4" opacity=".75"/>`;
+        twig+=`<text x="${(x1+x2)/2}" y="${(y1+y2)/2-5}" font-size="9.5" fill="#35709e" font-weight="700" text-anchor="middle">服务</text>`;
+        hl('infer','transformer',d,false); }
+      const gpE=byId['gpu'];
+      if(live(gpE)){ const g=center(gpE); const x1=ic.x-ic.w/2, y1=ic.bot, x2=g.x+g.w/2, y2=g.top, my=(y1+y2)/2;
+        const d=`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+        twig+=`<path d="${d}" stroke="#d08a3a" stroke-width="2.2" fill="none" stroke-dasharray="7 5" opacity=".6"/>`;
+        twig+=`<text x="${(x1+x2)/2}" y="${my+11}" font-size="9.5" fill="#c17d2e" font-weight="700" text-anchor="middle">推理算力</text>`;
+        hl('infer','gpu',d,false); }
+    }
+    // 多模态=跨架构能力（正交，不占架构分类）：点线虚连 Transformer，刻意区别于 5 种关系线
+    const mmE=byId['mm'], tfE3=byId['transformer'];
+    if(live(mmE)&&live(tfE3)){
+      const a=center(mmE), g=center(tfE3);
+      const x1=a.x+a.w/4, y1=a.bot, x2=g.x+g.w/2-8, y2=g.top;   // 多模态 → Transformer 最右端，从右侧绕开 闭源
+      const mx=Math.max(x1,x2)+22;                                // 向右鼓出贴边
+      const d=`M${x1},${y1} C${mx},${y1+16} ${mx},${y2-16} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#b0708f" stroke-width="2" fill="none" stroke-dasharray="2 4" opacity=".6"/>`;
+      twig+=`<text x="${a.x}" y="${a.bot+15}" font-size="9.5" fill="#9a5f7e" font-weight="700" text-anchor="middle">跨架构·任一架构可做</text>`;
+      hl('mm','transformer',d,false);
+    }
+    // Jev=把 Transformer 能力封装成「判断接口」的专用服务（架构未公开，不做生成）：点线虚连 Transformer
+    const jvE=byId['jev'], tfE4=byId['transformer'];
+    if(live(jvE)&&live(tfE4)){
+      const a=center(jvE), g=center(tfE4);
+      const x1=a.x-a.w/3, y1=a.bot, x2=g.x-g.w/2+10, y2=g.top;   // jev → Transformer 左上角：一条略弯的劣弧、近乎直线
+      const cx=Math.min(x1,x2)-24;                                 // 只向左轻微弯一点（避开 BERT），不绕远
+      const d=`M${x1},${y1} C${cx},${y1+(y2-y1)*0.34} ${cx},${y1+(y2-y1)*0.68} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#cf8a8a" stroke-width="2" fill="none" stroke-dasharray="2 4" opacity=".6"/>`;
+      twig+=`<text x="${a.x}" y="${a.bot+15}" font-size="9.5" fill="#b86a6a" font-weight="700" text-anchor="middle">封装判断接口·架构未公开</text>`;
+      hl('jev','transformer',d,false);
+    }
+    // 跨树算力线：深度学习 ⇢ GPU（虚线=使用它的算力，不是长在其上）
+    const dlE=byId['dl'], gpuE=byId['gpu'];
+    if(live(dlE)&&live(gpuE)){
+      const a=center(dlE), g=center(gpuE);
+      const x1=a.x+a.w/4, y1=a.bot, x2=g.x, y2=g.top, my=(y1+y2)/2;
+      const d=`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#d08a3a" stroke-width="2.6" fill="none" stroke-dasharray="7 5" opacity=".78"/>`;
+      twig+=`<text x="${(x1+x2)/2+4}" y="${my-4}" font-size="11" fill="#c17d2e" font-weight="700" text-anchor="middle">矩阵乘法·并行</text><text x="${(x1+x2)/2+4}" y="${my+10}" font-size="9.5" fill="#c17d2e" text-anchor="middle">GEMM / Tensor Core</text>`;
+      hl('dl','gpu',d,false);
+    }
+    // 实现线：高级语言生态 ⇢ C/C++（虚线=解释器/VM 用 C/C++ 写，不是运行平台；运行平台走实线主干 langs→os）
+    const langsE=byId['langs'], cppE=byId['cpp'];
+    if(live(langsE)&&live(cppE)){
+      const a=center(langsE), g=center(cppE);
+      const x1=a.x+a.w/2, y1=a.bot, x2=g.x+g.w/2, y2=g.top;   // langs 右端 → cpp 顶，向右鼓出绕开主干
+      const mx=Math.max(x1,x2)+78;
+      const d=`M${x1},${y1} C${mx},${y1+16} ${mx},${y2-16} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#8a5fb0" stroke-width="2.4" fill="none" stroke-dasharray="7 5" opacity=".75"/>`;
+      twig+=`<text x="${mx+6}" y="${(y1+y2)/2}" font-size="11" fill="#7a52a0" font-weight="700">实现于</text><text x="${mx+6}" y="${(y1+y2)/2+14}" font-size="9.5" fill="#7a52a0">VM/解释器用 C/C++ 写</text>`;
+      hl('langs','cpp',d,false);
+    }
+    // 依赖线：后端中间件 ⇢ 操作系统（虚线=靠 FS/VFS/网络/并发，不是结构主干）
+    const midE=byId['middleware'], osE2=byId['os'];
+    if(live(midE)&&live(osE2)){
+      const a=center(midE), g=center(osE2);
+      const x1=a.x-a.w/2, y1=(a.top+a.bot)/2, x2=g.x-g.w/2, y2=g.top;
+      const mx=Math.min(x1,x2)-72;
+      const d=`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#3f7fb0" stroke-width="2.4" fill="none" stroke-dasharray="7 5" opacity=".75"/>`;
+      twig+=`<text x="${mx-4}" y="${(y1+y2)/2}" font-size="11" fill="#35709e" font-weight="700" text-anchor="end">依赖</text><text x="${mx-4}" y="${(y1+y2)/2+14}" font-size="9.5" fill="#35709e" text-anchor="end">FS/VFS/网络</text>`;
+      hl('middleware','os',d,false);
+    }
+    // 思想源头线：人工神经元(琥珀 guest) ⇢ 感知机（1943 的想法 1958 被采纳，中途接入、不占主干）
+    const nnE=byId['nn'], pcE=byId['percep'];
+    if(live(nnE)&&live(pcE)){
+      const a=center(nnE), g=center(pcE);
+      const x1=a.x-a.w/2, y1=(a.top+a.bot)/2, x2=g.x+g.w/2, y2=(g.top+g.bot)/2;
+      const mx=(x1+x2)/2;
+      const d=`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#8a6c40" stroke-width="2.2" fill="none" stroke-dasharray="6 5" opacity=".7"/>`;
+      twig+=`<text x="${mx}" y="${Math.min(y1,y2)-6}" font-size="10" fill="#8a6c40" font-weight="700" text-anchor="middle">1958 被感知机采纳</text>`;
+      hl('nn','percep',d,false);
+    }
+    // 输入线：词嵌入 ⇢ Transformer（输入第一层就是嵌入表）
+    const embE=byId['embed'], tfE=byId['transformer'];
+    if(live(embE)&&live(tfE)){
+      const a=center(embE), g=center(tfE);
+      const x1=a.x, y1=a.top, x2=g.x+g.w/3, y2=g.bot, my=(y1+y2)/2;
+      const d=`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#3f7fb0" stroke-width="2.2" fill="none" stroke-dasharray="6 4" opacity=".75"/>`;
+      twig+=`<text x="${(x1+x2)/2+6}" y="${my-4}" font-size="10" fill="#35709e" font-weight="700" text-anchor="middle">输入=嵌入表</text>`;
+      hl('embed','transformer',d,false);
+    }
+    // 深度强化学习线：深度学习 ⇢ 强化学习（RL 源自机器学习，但现代 RL 用深度网络=深度 RL，如 AlphaGo）
+    const dlE2=byId['dl'], rlE=byId['rl'];
+    if(live(dlE2)&&live(rlE)){
+      const a=center(dlE2), g=center(rlE);
+      const x1=a.x+a.w/2, y1=(a.top+a.bot)/2, x2=g.x, y2=g.bot, mx=(x1+x2)/2;
+      const d=`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+      twig+=`<path d="${d}" stroke="#3f7fb0" stroke-width="2.2" fill="none" stroke-dasharray="6 4" opacity=".72"/>`;
+      twig+=`<text x="${(x1+x2)/2}" y="${Math.min(y1,y2)-5}" font-size="10" fill="#35709e" font-weight="700" text-anchor="middle">深度 RL</text>`;
+      hl('dl','rl',d,false);
+    }
+    // ── 工序标签：解释器 / 编译器 / 汇编器 / 链接器 挂在「层级之间的箭头」上（编译方向=向下）──
+    // 它们不是节点，是相邻层级之间的转换器；随缩放/滚动跟着边重算
+    let work='';
+    const wlab=(x,y,t,s,dash)=>{
+      const chars=Math.max([...t].length,[...(s||'')].length);
+      const w=chars*12+18, h=s?31:20;
+      return `<g class="worklab">`
+        +`<rect x="${(x-w/2).toFixed(1)}" y="${(y-h/2).toFixed(1)}" width="${w.toFixed(1)}" height="${h}" rx="6" fill="#fff6e8" stroke="#b98a5a" stroke-width="1.3"${dash?' stroke-dasharray="4 3"':''} opacity=".97"/>`
+        +`<text x="${x.toFixed(1)}" y="${(s?y-3:y+4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#8a5a33">${t}</text>`
+        +(s?`<text x="${x.toFixed(1)}" y="${(y+11).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9c6b3f">${s}</text>`:'')
+        +`</g>`;
+    };
+    const atEdge=(cid,pid,t)=>{const e=byId[cid],p=byId[pid];if(!live(e)||!live(p))return null;
+      const c=center(e),pc=center(p);const[x,y]=cubicPt(c.x,c.bot,pc.x,pc.top,t);return{x,y};};
+    let wp;
+    // 编译器：升级成可点击桥牌（替代原 SVG 标签），定位在 C→汇编 边中点；桥线悬停/卡片打开时高亮，连到右树 GPU
+    const cmpChip=document.getElementById('compiler_chip');
+    if(cmpChip){
+      const wpc=atEdge('cc','asm',0.5);
+      if(wpc){
+        cmpChip.style.display='flex';
+        const cw=cmpChip.offsetWidth||92, ch=cmpChip.offsetHeight||30;
+        cmpChip.style.left=(wpc.x-cw/2)+'px'; cmpChip.style.top=(wpc.y-ch/2)+'px';
+        if((brLit||compilerCardOpen) && live(byId['gpu'])){
+          const g=center(byId['gpu']);
+          const x1=wpc.x+cw/2, y1=wpc.y, x2=g.x-g.w/2, y2=g.top, mx=(x1+x2)/2;
+          const d=`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+          top+=`<path d="${d}" stroke="#7a52a0" stroke-width="3.4" fill="none" stroke-dasharray="8 5" stroke-linecap="round" opacity=".92"/>`;
+          top+=`<rect x="${(mx-98).toFixed(1)}" y="${((y1+y2)/2-21).toFixed(1)}" width="196" height="17" rx="5" fill="#f1ebfa" stroke="#9a7bbf" stroke-width="1" opacity=".97"/><text x="${mx.toFixed(1)}" y="${((y1+y2)/2-9).toFixed(1)}" font-size="10.5" fill="#6a4596" font-weight="700" text-anchor="middle">AI 编译栈 → LLVM/PTX → GPU/NPU</text>`;
+        }
+      } else cmpChip.style.display='none';
+    }
+    if(wp=atEdge('asm','isa',0.1)) work+=wlab(wp.x,wp.y,'▼ 汇编器','汇编→.o');
+    // 链接器：在机器码级别把 .o 合成可执行；挂到机器码那排(RISC-V)右侧，引一条线回去
+    const rvE=byId['riscv']; if(live(rvE)){const rv=center(rvE);
+      const lw=4*12+18, lx=rv.x+rv.w/2+22+lw/2;
+      work+=`<path d="M${(lx-lw/2).toFixed(1)},${rv.y} L${(rv.x+rv.w/2).toFixed(1)},${rv.y}" stroke="#b98a5a" stroke-width="1.3" stroke-dasharray="3 3" fill="none"/>`;
+      work+=wlab(lx,rv.y,'▼ 链接器','.o→可执行');}
+    if(wp=atEdge('interp','langs',0.5)) work+=wlab(wp.x,wp.y,'解释器','不编译·直接执行',true);
+
+    const defs=`<defs><linearGradient id="barkG" gradientUnits="userSpaceOnUse" x1="0" y1="${b.height}" x2="0" y2="0"><stop offset="0" stop-color="#7d4e28"/><stop offset="1" stop-color="#b98a5a"/></linearGradient></defs>`;
+    svg.innerHTML=defs+trunk+twig+leaves+work; svgTop.innerHTML=top;
+  }
+
+  // 控制
+  const evtYears=years;
+  function setYear(y){ current=Math.max(MINY,Math.min(MAXY,y)); render(); }
+  document.getElementById('full').onclick=()=>{stop();setYear(MAXY);hideInfo();};
+  document.getElementById('step').onclick=()=>{stop();const nxt=evtYears.find(y=>y>current);
+    if(nxt==null){setYear(MAXY);hideInfo();}else{setYear(nxt);showYearInfo(nxt);}};
+  document.getElementById('slider').oninput=e=>{stop();setYear(Math.round(MINY+(MAXY-MINY)*e.target.value/100));hideInfo();};
+  function stop(){if(timer){clearInterval(timer);timer=null;}document.getElementById('grow').classList.remove('on');}
+  document.getElementById('grow').onclick=function(){
+    if(timer){stop();return;}
+    this.classList.add('on'); current=MINY; render(); showYearInfo(MINY);
+    timer=setInterval(()=>{const nxt=evtYears.find(y=>y>current);
+      if(nxt==null){stop();setYear(MAXY);}else{setYear(nxt);showYearInfo(nxt);}},1400);
+  };
+
+  let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(render,120);});
+  // 地基横向滑动时，连到地基盒子的枝要跟着重画
+  const bdEl=document.querySelector('.bedrock');
+  if(bdEl) bdEl.addEventListener('scroll',()=>requestAnimationFrame(drawBranches),{passive:true});
+  if(document.readyState==='complete') render(); else window.addEventListener('load',render);
+  setTimeout(render,300);
+})();
+</script>
+
+<script>
+// 三条路各落到进程内存的正确段：编译原生→.text / 纯解释→堆 / 解释+JIT→code cache
+(function(){
+  const box=document.querySelector('.hinner'), svg=document.getElementById('linkSvg');
+  // 每条路落到进程内存的「正确」段：编译原生→.text(程序的机器码)、纯解释→堆(字节码当数据)、解释+JIT→code cache(JIT机器码)
+  const MAP=[
+    {end:'end-native', seg:'seg-text', label:'程序的机器码'},
+    {end:'end-interp', seg:'seg-heap', label:'字节码·数据'},
+    {end:'end-jvm',    seg:'seg-cc',   label:'JIT 机器码'},
+  ];
+  function draw(){
+    if(!box||!svg) return;
+    const b=box.getBoundingClientRect();
+    svg.setAttribute('viewBox',`0 0 ${b.width} ${b.height}`);svg.setAttribute('width',b.width);svg.setAttribute('height',b.height);
+    let s='';
+    MAP.forEach(m=>{
+      const e=document.getElementById(m.end), seg=document.getElementById(m.seg);
+      if(!e||!seg) return;
+      const r=e.getBoundingClientRect(), sr=seg.getBoundingClientRect();
+      const x1=r.right-b.left, y1=r.top-b.top+r.height/2;       // 终点右沿中点
+      const tx=sr.left-b.left, ty=sr.top-b.top+sr.height/2;     // 目标段左沿中点
+      const x2=tx-5, y2=ty;
+      const d=`M${x1},${y1} C${x1+55},${y1} ${x2-55},${y2} ${x2},${y2}`;  // 横向汇入
+      s+=`<path d="${d}" fill="none" stroke="#9c6b3f" stroke-width="2" stroke-dasharray="6 5" opacity=".7"/>`;
+      s+=`<path d="M${x2-9},${y2-5} L${x2},${y2} L${x2-9},${y2+5}" fill="none" stroke="#9c6b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`;
+      s+=`<text x="${x2-12}" y="${y2-7}" font-size="10.5" fill="#8a6c40" text-anchor="end">${m.label}</text>`;
+    });
+    svg.innerHTML=s;
+  }
+  window.addEventListener('load',draw);
+  window.addEventListener('resize',()=>{clearTimeout(window.__lk);window.__lk=setTimeout(draw,160);});
+  // 横向容器滚动时，线要跟着（SVG 在 .hinner 内，随内容滚，但重算一次更稳）
+  const hf=document.querySelector('.hflow'); if(hf) hf.addEventListener('scroll',()=>{clearTimeout(window.__lk2);window.__lk2=setTimeout(draw,60);},{passive:true});
+  setTimeout(draw,450);
+})();
+</script>
+
+<div class="xdiv"><i>交互详解 · 一段代码怎么跑起来（可切换语言）</i></div>
+<style>
+/* 内联交互详解：原 iframe 文档整体隔离在 #rtx 下，字号与页面一致 */
+#rtx{
+  --bg:#f4f1e9;--paper:#fffdf8;--ink:#2a2f3a;--dim:#5f6b7a;--faint:#9aa6b4;--line:#d8d2c4;
+  --gold:#b8862f;--goldbg:#fbf0d8;--blue:#2f6cb0;--bluebg:#e8f1fb;--green:#3f8f52;--greenbg:#eaf5e9;
+  --violet:#7059a5;--violetbg:#f0ebfa;--brown:#8a5a33;--red:#c0392b;--teal:#3f9e9e;
+  --serif:"Songti SC","Noto Serif SC",Georgia,serif;--sans:"PingFang SC",-apple-system,"Helvetica Neue",sans-serif;--mono:"SF Mono",ui-monospace,Menlo,monospace;
+}#rtx *{box-sizing:border-box}#rtx{margin:0;background:radial-gradient(ellipse at top,#fffdf8,#f1ece1 70%);color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased}#rtx .wrap{max-width:1180px;margin:auto;padding:30px 20px 70px}#rtx h1{font-family:var(--serif);font-size:clamp(26px,4vw,38px);margin:0 0 6px;text-align:center}#rtx .sub{text-align:center;color:var(--dim);margin:0 auto 26px;max-width:62ch}#rtx .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 6px 20px #28364a10;margin-top:26px}#rtx .lab{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--brown);text-transform:uppercase;margin-bottom:10px}#rtx .card h3{margin:0 0 4px;font-size:19px;font-family:var(--serif)}#rtx .card .sub2{color:var(--dim);font-size:12.5px;margin:0 0 14px}#rtx .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}#rtx .chip{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:8px 13px;font-size:13.5px;font-weight:600;text-align:center;white-space:nowrap}#rtx .chip small{display:block;font-size:10.5px;color:var(--dim);font-weight:400;margin-top:2px}#rtx .chip.v{background:var(--goldbg);border-color:#e6cf9c}#rtx .chip.k{background:var(--violetbg);border-color:#cfc3ea}#rtx .chip.ir{background:var(--bluebg);border-color:#bcd6f0}#rtx .ar{color:var(--brown);font-weight:700;font-size:17px}#rtx .hint{text-align:center;font-size:12px;color:var(--faint);margin-top:11px}#rtx .hint b{color:var(--brown)}#rtx .em{color:var(--red);font-weight:700}/* tab */
+#rtx .tabs{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:26px 0 0}#rtx .tabs button{all:unset;cursor:pointer;font-weight:700;font-size:13.5px;padding:8px 15px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:var(--dim)}#rtx .tabs button.on{color:#fff;border-color:transparent}#rtx .tabs button[data-fam=aot].on{background:var(--violet)}#rtx .tabs button[data-fam=jitvm].on{background:var(--green)}#rtx .tabs button[data-fam=interp].on{background:var(--blue)}#rtx .tabs button[data-fam=web].on{background:var(--teal)}/* 前端·浏览器渲染管线 */
+#rtx .webpipe{border:1.5px solid var(--line);border-radius:11px;background:#fcf7ee;padding:12px 14px;margin-bottom:14px}#rtx .wlane{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:5px 0}#rtx .wtag{font-size:11.5px;font-weight:800;color:#fff;border-radius:7px;padding:4px 10px;min-width:50px;text-align:center}#rtx .wtag.html{background:#d98a2b}#rtx .wtag.css{background:#2f6cb0}#rtx .wtag.js{background:#3f8f52}#rtx .wmod{font-size:11px;color:var(--dim)}#rtx .wconv{text-align:center;font-size:12px;color:var(--brown);font-weight:700;margin:9px 0 7px}/* 语言面板 */
+#rtx .panel{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;margin-top:16px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 6px 20px #28364a10}#rtx .panel h3{margin:0;font-size:20px;font-family:var(--serif)}#rtx .panel .tagline{color:var(--dim);font-size:13px;margin:3px 0 14px}#rtx .badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}#rtx .badge{font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 11px;border:1.5px solid}#rtx .badge.yes{color:var(--green);border-color:#bcdcb6;background:var(--greenbg)}#rtx .badge.no{color:#b06a6a;border-color:#e5c6c6;background:#fbeeee}#rtx .badge.kind{color:var(--brown);border-color:#e6cf9c;background:var(--goldbg)}#rtx .plabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin:4px 0 8px}#rtx .pflow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}#rtx .pnote{font-size:13px;color:var(--ink);background:var(--goldbg);border:1px dashed #e6cf9c;border-radius:9px;padding:9px 12px;line-height:1.55}#rtx .pnote b{color:var(--brown)}#rtx .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}#rtx .q{border:1px solid var(--line);border-radius:9px;background:#fff;padding:8px 10px}#rtx .q .qt{font-size:10.5px;color:var(--faint);font-family:var(--mono);letter-spacing:.06em;margin-bottom:3px}#rtx .q .qa{font-size:12.5px;font-weight:600;line-height:1.4}#rtx .q .qa b{color:var(--brown)}/* 内存图：进程=谁 */
+#rtx .mem{border:1.5px solid var(--line);border-radius:11px;background:#fcf7ee;padding:10px 12px}#rtx .mem .proc{text-align:center;font-size:12.5px;margin-bottom:6px}#rtx .mem .proc b{color:var(--brown);font-weight:800}#rtx .mem .ends{text-align:center;font-family:var(--mono);font-size:10px;color:var(--faint);margin:2px 0}#rtx .seg{border:1px solid var(--line);border-left-width:5px;border-radius:6px;background:#fff;padding:6px 10px;margin:4px 0;font-size:12.5px;transition:.2s}#rtx .seg b{font-weight:700}#rtx .seg span{display:block;font-size:10.5px;color:var(--dim);margin-top:1px}#rtx .seg.stack{border-left-color:#c76b6b}#rtx .seg.heap{border-left-color:#d9a441}#rtx .seg.data{border-left-color:#4f9e61}#rtx .seg.text{border-left-color:#4e86c4}#rtx .seg.cc{border-left-color:var(--violet);border-style:dashed}#rtx .seg.method{border-left-color:var(--teal)}#rtx .seg.mine{box-shadow:0 0 0 2.5px var(--gold);background:#fffaf0}#rtx .seg.vmself{background:#f3f2ee;color:var(--dim)}#rtx .memkey{text-align:center;font-size:11px;color:var(--brown);margin-top:8px}#rtx .memkey b{color:var(--gold)}/* 解释器 dispatch */
+#rtx .disp{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}#rtx .disp pre{margin:0;background:#2a2f3a;color:#e8eef5;border-radius:10px;padding:13px 15px;font:12px/1.65 var(--mono);overflow-x:auto}#rtx .disp pre .c{color:#8aa0b5}#rtx .disp pre .k{color:#e0a94e}#rtx .disp pre .s{color:#9ccb7a}#rtx .disp ul{margin:0;padding-left:18px}#rtx .disp li{font-size:13px;margin:6px 0;line-height:1.5}#rtx .disp li b{color:var(--brown)}#rtx .dispflow{margin-top:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}/* HotSpot 分层编译 */
+#rtx .tiers{display:grid;grid-template-columns:1.5fr .85fr;gap:16px;align-items:center}#rtx .tier{border:1.5px solid var(--line);border-radius:10px;padding:10px 13px;background:#fff}#rtx .tier .tl{display:flex;align-items:baseline;gap:8px}#rtx .tier .lv{font-family:var(--mono);font-size:10px;font-weight:700;color:#fff;background:var(--dim);border-radius:5px;padding:1px 6px;white-space:nowrap}#rtx .tier.t0{border-color:#bcd6f0}#rtx .tier.t0 .lv{background:var(--blue)}#rtx .tier.t1{border-color:#e6cf9c}#rtx .tier.t1 .lv{background:var(--gold)}#rtx .tier.t2{border-color:#cfc3ea}#rtx .tier.t2 .lv{background:var(--violet)}#rtx .tier b{font-size:14px}#rtx .tier span{display:block;font-size:11.5px;color:var(--dim);margin-top:3px;line-height:1.5}#rtx .tier span b{color:var(--brown);font-size:11.5px}#rtx .trig{text-align:center;font-size:11px;color:var(--brown);font-weight:700;margin:5px 0}#rtx .ccbox{border:2px dashed var(--violet);border-radius:11px;background:var(--violetbg);padding:14px 14px;text-align:center}#rtx .ccbox b{color:var(--violet);font-size:14px}#rtx .ccbox span{display:block;font-size:11.5px;color:var(--dim);margin-top:6px;line-height:1.5}#rtx .ccbox span b{color:var(--violet);font-size:11.5px}#rtx .deopt{margin-top:12px;font-size:12px;color:var(--dim);background:#fbeeee;border:1px dashed #e5c6c6;border-radius:9px;padding:9px 12px;line-height:1.6}#rtx .deopt b{color:var(--red)}#rtx .dispsvg text{font-family:var(--sans)}#rtx .cmds{display:flex;flex-direction:column;gap:5px;margin-top:4px}#rtx .cmdrow{display:flex;align-items:baseline;gap:9px}#rtx .cmdrow .cl{flex:none;width:46px;font-size:10.5px;color:var(--faint);font-weight:700;text-align:right}#rtx .cmdrow code{font-family:var(--mono);font-size:11.5px;background:#f2efe6;border:1px solid var(--line);border-radius:5px;padding:3px 8px;color:#3a4252;flex:1}#rtx .whyfast{margin-top:14px}#rtx .whyfast .warn{text-align:center;font-size:12px;color:var(--brown);font-weight:700;margin:4px 0 10px}#rtx .whyfast .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}#rtx .whyfast .lane{border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.55}#rtx .whyfast .lane.i{border-color:#bcd6f0;background:var(--bluebg)}#rtx .whyfast .lane.j{border-color:#e6cf9c;background:var(--goldbg)}#rtx .whyfast .lane h4{margin:0 0 6px;font-size:13px}#rtx .whyfast .lane.i h4{color:var(--blue)}#rtx .whyfast .lane.j h4{color:var(--gold)}#rtx .whyfast .lane b{color:var(--brown)}#rtx .whyfast .loopline{font-family:var(--mono);font-size:10.5px;background:#fff;border:1px dashed var(--line);border-radius:6px;padding:5px 7px;margin:6px 0;color:#444;line-height:1.5}#rtx .whyfast .fast{margin-top:10px;background:#fff6e8;border:1px solid #e6cf9c;border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.6}#rtx .whyfast .fast b{color:var(--red)}
+@media(max-width:820px){#rtx .whyfast .cmp{grid-template-columns:1fr}}/* 编译器三段 / 链接器 */
+#rtx .impl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-top:14px}#rtx .impl .ic{border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 11px;font-size:12.5px}#rtx .impl .ic b{display:block;color:var(--brown);font-size:13px;margin-bottom:2px}#rtx .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}#rtx .two .box{border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff}#rtx .two .box.st{border-color:#cfc3ea;background:var(--violetbg)}#rtx .two .box.dy{border-color:#bcdcb6;background:var(--greenbg)}#rtx .two .box h4{margin:0 0 5px;font-size:14px}#rtx .two .box ul{margin:0;padding-left:17px}#rtx .two .box li{font-size:12.5px;margin:2px 0}#rtx .caveat{margin-top:13px;font-size:12px;color:var(--dim);background:#f7f2e8;border:1px dashed var(--line);border-radius:9px;padding:9px 12px;line-height:1.6}#rtx .caveat b{color:var(--brown)}/* 经典 x86 两进程 */
+#rtx .x86 .procs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px}#rtx .proc2{border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;background:#fff}#rtx .proc2.a{border-color:#bcd6f0}#rtx .proc2.b{border-color:#f0c9a6}#rtx .proc2 .ph{font-weight:800;font-size:13.5px;margin-bottom:6px}#rtx .proc2.a .ph{color:var(--blue)}#rtx .proc2.b .ph{color:#b5702f}#rtx .proc2 code{display:block;font-family:var(--mono);font-size:11.5px;background:#f7f4ec;border-radius:6px;padding:6px 8px;color:#444;white-space:pre}#rtx .proc2 .va{margin-top:6px;font-size:11.5px;color:var(--dim)}#rtx .proc2 .va b{font-family:var(--mono);color:var(--ink)}#rtx .samevaddr{text-align:center;font-size:12px;color:var(--brown);margin:8px 0 14px;font-weight:600}#rtx .stage{display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 13px;margin:8px 0}#rtx .stage .sn{font-weight:800;font-size:13.5px;color:var(--ink)}#rtx .stage .sn small{display:block;font-family:var(--mono);font-size:10px;color:var(--faint);font-weight:400;margin-top:2px}#rtx .stage .sd{font-size:12.5px;color:var(--dim);line-height:1.5}#rtx .stage .sd b{color:var(--brown)}#rtx .stage.seg2{background:var(--bluebg);border-color:#bcd6f0}#rtx .stage.page{background:var(--violetbg);border-color:#cfc3ea}#rtx .stepar{text-align:center;color:var(--brown);font-weight:700;font-size:15px;margin:-2px 0}#rtx .forked{display:grid;grid-template-columns:1fr 1fr;gap:10px}#rtx .forked .fk{border-radius:8px;padding:7px 9px;font-size:11.5px}#rtx .forked .fk.a{background:#eef5fc;border:1px solid #bcd6f0}#rtx .forked .fk.b{background:#fcf1e6;border:1px solid #f0c9a6}#rtx .forked .fk b{font-family:var(--mono)}#rtx .pmem{margin-top:14px}#rtx .pmem .pt{font-weight:700;font-size:12.5px;color:#6b4e28;margin-bottom:6px;text-align:center}#rtx .ram{display:flex;border:2px solid var(--line);border-radius:9px;overflow:hidden;font-size:11px;font-family:var(--mono)}#rtx .ram .fr{padding:12px 6px;text-align:center;border-right:1px solid var(--line);flex:1}#rtx .ram .fr:last-child{border-right:0}#rtx .ram .fr small{display:block;font-family:var(--sans);font-size:10px;color:#fff9;margin-top:2px}#rtx .ram .fr.kern{background:#6b7280;color:#fff}#rtx .ram .fr.pa{background:var(--blue);color:#fff}#rtx .ram .fr.pb{background:#b5702f;color:#fff}#rtx .ram .fr.free{background:#f0ece2;color:var(--faint)}#rtx .pmem .legend{text-align:center;font-size:11.5px;color:var(--dim);margin-top:8px}#rtx .pmem .legend b{color:var(--brown)}#rtx .isobox{margin-top:14px;background:#eef5fc;border:1.5px solid #bcd6f0;border-radius:10px;padding:11px 14px;font-size:12.5px;line-height:1.65;color:var(--ink)}#rtx .isobox>b{color:var(--blue);display:block;margin-bottom:5px;font-size:13.5px}#rtx .isobox b{color:var(--brown)}#rtx .isohl{margin-top:8px;background:#fff;border:1px dashed #bcd6f0;border-radius:7px;padding:8px 10px}#rtx .isohl b{color:var(--blue)}/* 宏观两条路 */
+#rtx .macro2{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}#rtx .macro2 .start, #rtx .macro2 .end{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;text-align:center}#rtx .macro2 .ar{color:var(--brown);font-weight:700;font-size:17px}#rtx .lanes{display:flex;flex-direction:column;gap:8px}#rtx .lane{border:1.5px solid var(--line);border-radius:10px;padding:8px 11px}#rtx .lane.aot{border-color:#cfc3ea;background:var(--violetbg)}#rtx .lane.vm{border-color:#bcdcb6;background:var(--greenbg)}#rtx .lane .lt{font-size:11.5px;font-weight:800;margin-bottom:5px}#rtx .lane.aot .lt{color:var(--violet)}#rtx .lane.vm .lt{color:var(--green)}#rtx .lane .lf{display:flex;align-items:center;gap:5px;flex-wrap:wrap}#rtx .lane .lf .chip{font-size:12px;padding:5px 9px}#rtx .lane .ln{font-size:10.5px;color:var(--dim);margin-top:5px}#rtx .lane .ln b{color:var(--brown)}#rtx .ar2{color:var(--brown);font-weight:700}/* 原理 tabs */
+#rtx .pwrap-h{text-align:center;font-family:var(--serif);font-size:22px;margin:38px 0 2px}#rtx .pwrap-s{text-align:center;color:var(--dim);font-size:12.5px;margin:0 0 4px}#rtx .ptabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0 2px}#rtx .ptabs button{all:unset;cursor:pointer;font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px;border:1.5px solid var(--line);background:#fff;color:var(--dim)}#rtx .ptabs button.on{background:var(--brown);color:#fff;border-color:transparent}#rtx .psec{display:none}#rtx .psec.on{display:block}
+
+@media(max-width:820px){#rtx .panel, #rtx .disp, #rtx .tiers{grid-template-columns:1fr}#rtx .three{grid-template-columns:1fr}#rtx .x86 .procs{grid-template-columns:1fr}#rtx .stage{grid-template-columns:1fr}}#rtx footer{text-align:center;color:var(--faint);font-size:11px;margin-top:30px}
+
+#rtx{display:block;border-radius:16px;overflow:hidden;margin-top:6px}
+</style>
+<div id="rtx">
+<div class="wrap">
+<h1>一段代码怎么跑起来</h1>
+<p class="sub">宏观上所有语言同一条路；差别在「各自怎么处理」。关键一问：<b>这个进程到底是谁</b>——是程序本身，还是一台虚拟机（JVM / CPython / V8）把程序代码当数据加载进来跑？点标签切语言。</p>
+
+<!-- 宏观总图（两条路·诚实版） -->
+<div class="card">
+  <div class="lab">宏观：最终都是 CPU 跑机器码，但那机器码是谁的不一样</div>
+  <div class="macro2">
+    <div class="start">源代码</div>
+    <div class="ar">→</div>
+    <div class="lanes">
+      <div class="lane aot">
+        <div class="lt">路 A · 编译原生 (AOT)</div>
+        <div class="lf"><span class="chip">编译</span><span class="ar2">→</span><span class="chip v">程序的机器码</span><span class="ar2">→</span><span class="chip">进程 = 程序本身</span></div>
+        <div class="ln">C/C++ · Go · Rust：程序代码<b>就是</b>要跑的机器码</div>
+      </div>
+      <div class="lane vm">
+        <div class="lt">路 B · 字节码 + 虚拟机</div>
+        <div class="lf"><span class="chip">编成字节码<small>数据</small></span><span class="ar2">→</span><span class="chip ir">VM 解释 (±JIT)</span><span class="ar2">→</span><span class="chip">进程 = VM</span></div>
+        <div class="ln">Python · Java · JS：跑的是 <b>VM / JIT 的机器码</b>，程序代码是它加载的数据</div>
+      </div>
+    </div>
+    <div class="ar">→</div>
+    <div class="end">
+      <span class="chip" style="border-style:dashed">基础库<small>glibc / libstdc++ · 可选</small></span><span class="ar2">→</span>
+      <span class="chip">系统调用<small>用户态↔内核态</small></span><span class="ar2">→</span>
+      <span class="chip k">内核 OS<small>文件 / 网络 / 进程</small></span><span class="ar2">→</span>
+      <span class="chip v">CPU / ISA<small>取指执行</small></span>
+    </div>
+  </div>
+  <div class="hint">唯一对所有语言都成立的：<b>CPU 永远只执行机器码</b>。区别是这段机器码是<b>程序本身</b>（AOT），还是<b>解释器 / VM + JIT 的产物</b>（字节码语言）——源码本身可能<b>从不变成机器码</b>（纯解释）。<br>尾链里 <b>基础库（glibc / libstdc++）是可选的</b>一层封装：静态链接、或 Go 这类运行时可<b>绕过 libc 直发系统调用</b>；但<b>系统调用</b>这道用户态↔内核态的门谁都绕不过，再往下才是内核与 CPU/ISA。</div>
+</div>
+
+<!-- tab -->
+<div class="tabs" id="tabs"></div>
+<div id="panel"></div>
+
+<!-- ===== 原理详解 tabs ===== -->
+<h2 class="pwrap-h">原理详解</h2>
+<p class="pwrap-s">上面讲每种语言各自怎么跑；下面四块是它们<b>共用的底层机器</b>——点标签切换。</p>
+<div class="ptabs" id="ptabs">
+  <button data-p="interp">解释器原理</button>
+  <button data-p="compiler">编译器原理</button>
+  <button data-p="linker">链接器原理</button>
+  <button data-p="mem">进程地址空间原理</button>
+</div>
+<div id="pcontent">
+
+<div class="psec on" data-p="interp">
+<!-- 解释器怎么执行（新） -->
+<div class="card">
+  <div class="lab">核心机制 · 解释器怎么跑一段字节码（Python / Java / JS 通用）</div>
+  <h3>解释器本身是个原生程序，核心是一个 switch 分派循环</h3>
+  <p class="sub2">字节码语言的「VM」说白了就是一个普通的原生程序（它的机器码在进程的 <b>.text</b>）。它的心脏是一个循环：取一条字节码 → <b>switch</b> 跳到这条 opcode 的处理逻辑——源码里是一段 C 函数，但<b>构建解释器时就已经 AOT 编成机器码</b>、躺在 .text 里 → CPU 执行这段现成机器码 → 取下一条。<span class="em">字节码只是被它读取的数据</span>。</p>
+  <div class="disp">
+    <pre><span class="c">// 解释器的心脏（简化）</span>
+<span class="k">for</span> (;;) {
+  op = *pc++;            <span class="c">// 取下一条字节码</span>
+  <span class="k">switch</span> (op) {
+    <span class="k">case</span> LOAD:  push(local); <span class="k">break</span>;
+    <span class="k">case</span> ADD:   push(pop()+pop()); <span class="k">break</span>;
+    <span class="k">case</span> CALL:  call_func(); <span class="k">break</span>;
+    <span class="c">// …每条 opcode 对应一段处理代码（构建解释器时已编成机器码）</span>
+  }
+}</pre>
+    <ul>
+      <li><b>字节码 = 数据</b>：每条 opcode 查 switch 跳到它的处理代码。这些代码用 C 写，但<b>构建 CPython 时就已 AOT 编成机器码</b>——运行期 CPU 跑的是这份现成机器码，解释器不为程序代码生成任何<b>新</b>机器码。</li>
+      <li><b>纯解释（CPython）</b>：到此为止，每次都走这个循环。慢，但简单、可移植。</li>
+      <li><b>解释 + JIT（Java/JS）</b>：解释器顺便数每段代码跑了多少次；<b>热点</b>被 JIT 编成真机器码缓存起来，下次<b>绕过 dispatch 循环直接执行</b>。</li>
+      <li><b>Java 的分层</b>：解释器(L0) → <b>C1</b>(轻量 JIT，快编、顺便采集热度) → <b>C2</b>(重度优化 JIT)。C1/C2 <span class="em">都是 JIT</span>，解释的是解释器。</li>
+    </ul>
+  </div>
+  <svg class="dispsvg" viewBox="0 0 640 185" width="100%" style="max-width:640px;display:block;margin:16px auto 0">
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#8a5a33"/></marker>
+      <marker id="ahg" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#b8862f"/></marker></defs>
+    <rect x="12" y="68" width="98" height="50" rx="9" fill="#fff" stroke="#d8d2c4" stroke-width="1.5"/>
+    <text x="61" y="98" text-anchor="middle" font-size="15" font-weight="700" fill="#2a2f3a">字节码</text>
+    <rect x="212" y="14" width="208" height="54" rx="9" fill="#e8f1fb" stroke="#bcd6f0" stroke-width="1.5"/>
+    <text x="316" y="37" text-anchor="middle" font-size="13.5" font-weight="700" fill="#2a2f3a">解释器 dispatch</text>
+    <text x="316" y="55" text-anchor="middle" font-size="11" fill="#5f6b7a">switch 逐条执行（纯解释到此）</text>
+    <rect x="212" y="114" width="236" height="54" rx="9" fill="#fbf0d8" stroke="#e6cf9c" stroke-width="1.5"/>
+    <text x="330" y="137" text-anchor="middle" font-size="13.5" font-weight="700" fill="#8a5a33">机器码缓存 (code cache)</text>
+    <text x="330" y="155" text-anchor="middle" font-size="11" fill="#5f6b7a">仅 Java/JS · 下次直接跑</text>
+    <rect x="482" y="114" width="146" height="54" rx="9" fill="#f0ebfa" stroke="#cfc3ea" stroke-width="1.5"/>
+    <text x="555" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="#7059a5">CPU 执行机器码</text>
+    <text x="555" y="156" text-anchor="middle" font-size="10" fill="#5f6b7a">两条都在这跑</text>
+    <!-- 实线：字节码 → 解释器 dispatch（逐条解释） -->
+    <path d="M110,88 C150,80 175,44 210,42" fill="none" stroke="#8a5a33" stroke-width="2" marker-end="url(#ah)"/>
+    <text x="138" y="58" font-size="11" fill="#8a5a33" font-weight="700">逐条解释</text>
+    <!-- 虚线①：解释器 dispatch → 机器码缓存（解释器数到热点，触发 JIT） -->
+    <path d="M300,70 L300,110" fill="none" stroke="#b8862f" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ahg)"/>
+    <text x="310" y="95" font-size="11" fill="#b8862f" font-weight="700">数到热点 · 触发 JIT</text>
+    <!-- 虚线②：字节码 → 机器码缓存（JIT 以字节码为输入，编成机器码） -->
+    <path d="M62,118 C90,150 150,146 208,146" fill="none" stroke="#b8862f" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ahg)"/>
+    <text x="66" y="170" font-size="11" fill="#b8862f" font-weight="700">JIT 以字节码为输入编译</text>
+    <!-- 机器码缓存 → CPU（热代码在执行：虚线） -->
+    <path d="M448,141 L478,141" fill="none" stroke="#b8862f" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ahg)"/>
+    <!-- 解释器 dispatch → CPU（冷/解释路径：实线，解释器本身就是机器码） -->
+    <path d="M420,50 C470,62 510,92 538,112" fill="none" stroke="#8a5a33" stroke-width="2" marker-end="url(#ah)"/>
+    <text x="436" y="88" font-size="10.5" fill="#5f6b7a" font-weight="700">解释器本身也是机器码</text>
+  </svg>
+  <p style="text-align:center;font-size:11.5px;color:var(--faint);margin:8px 0 0"><b style="color:#8a5a33">实线＝冷 / 解释路径</b>（字节码被解释器逐条解释、解释器本身也在 CPU 上跑）；<b style="color:#b8862f">虚线＝热代码路径</b>（数到热点 → 触发 JIT → 以字节码为输入编成机器码 → 这段热机器码直接在 CPU 上跑）。</p>
+
+  <div class="whyfast">
+    <div class="warn">⚠ 两条路最终都由 CPU 执行机器码——CPU 只会跑机器码；区别是它跑的是「解释器」还是「程序自身的专用机器码」</div>
+    <div class="cmp">
+      <div class="lane i">
+        <h4>① 解释执行时，CPU 在跑什么</h4>
+        CPU 跑的是<b>解释器自己的机器码</b>。对<b>每一条</b>字节码，都重复一遍：
+        <div class="loopline">取码 → switch 查跳转 → 执行该 opcode 的处理机器码（C 写的、构建时编好）→ 回循环顶 ↺</div>
+        一条字节码 ≈ 几十条 CPU 指令的<b>间接开销</b>，还没法跨字节码优化。
+      </div>
+      <div class="lane j">
+        <h4>② JIT 后，CPU 在跑什么</h4>
+        热点字节码被<b>一次性</b>编成<b>程序自身逻辑的机器码</b>。之后 CPU：
+        <div class="loopline">连续直跑这段机器码：无取码 / 无 switch / 无回环</div>
+        还能跨指令优化（值留寄存器、内联、删冗余检查）——就是普通原生机器码。
+      </div>
+    </div>
+    <div class="fast">⚡ <b>所以 JIT 快：</b>解释＝「CPU 跑一个通用解释器去逐条翻译字节码」，每条都付分派开销；JIT＝「CPU 直接跑这段逻辑的专用机器码」，编一次、之后零分派——同样的活常快 <b>10～100×</b>。代价是编译要花时间，所以只对<b>热点</b>才值得。</div>
+  </div>
+</div>
+
+<!-- HotSpot 分层编译（Java 细节） -->
+<div class="card">
+  <div class="lab">Java 细节 · HotSpot 内部：字节码解释器 + C1 / C2 分层编译</div>
+  <h3>一个方法怎么从「解释」逐步升到「重度优化的机器码」</h3>
+  <p class="sub2">HotSpot 里有三套执行引擎：一个<b>字节码解释器</b>负责解释，两个 JIT（<b>C1、C2</b>）负责编译。方法越热，待遇越高；所有编译产物都进 Code Cache。</p>
+  <div class="tiers">
+    <div>
+      <div class="tier t0"><div class="tl"><span class="lv">L0 解释</span><b>字节码解释器</b></div><span>逐条 switch 解释执行，同时统计调用次数 / 循环回边次数（<b>数热度</b>）。刚启动的代码都在这跑。</span></div>
+      <div class="trig">↓ 热度过阈值（温）</div>
+      <div class="tier t1"><div class="tl"><span class="lv">C1 · L1–3</span><b>Client 编译器（轻量 JIT）</b></div><span>编译快、优化保守，并<b>插桩采集 profile</b>。先让程序快起来，同时摸清谁是真热点。→ 机器码进 Code Cache。</span></div>
+      <div class="trig">↓ profile 显示是真热点（烫）</div>
+      <div class="tier t2"><div class="tl"><span class="lv">C2 · L4</span><b>Server 编译器（重度优化 JIT）</b></div><span>基于 profile 做<b>内联 / 逃逸分析 / 循环优化</b>，生成最快的机器码。→ 机器码进 Code Cache。</span></div>
+    </div>
+    <div class="ccbox"><b>Code Cache</b><span>独立的<b>本地内存</b>区（不是 Java 堆）。C1/C2 编出的机器码都放这里；下次调用<b>直接跑机器码</b>，绕过解释循环。</span></div>
+  </div>
+  <div class="deopt"><b>deopt（去优化）＝ 赌错了就退回：</b>JIT 的激进优化都基于<b>乐观假设</b>（赌某情况永远成立，于是省掉检查、生成极快的机器码）。假设被打破时，这份机器码就是错的，HotSpot/V8 便<b>丢弃它、退回解释器</b>重新正确执行，之后可再编译——这是「乐观优化」能成立的安全网。
+    <div style="margin-top:8px;background:#fff;border:1px solid #e5c6c6;border-radius:7px;padding:8px 10px;font-family:var(--mono);font-size:11.5px;color:#444;line-height:1.7">
+      <span style="color:#8aa0b5">// V8 的例子</span><br>
+      add(1,2); add(3,4);　<span style="color:#8aa0b5">→ 赌「a,b 一直是整数」，编出跳过类型检查的快机器码</span><br>
+      add(<span style="color:#c0392b">"x","y"</span>);　　　<span style="color:#8aa0b5">→ 假设破！guard 发现是字符串 →</span> <b style="color:#c0392b">deopt</b> <span style="color:#8aa0b5">退回解释器，按拼接重算 "xy"</span>
+    </div>
+    常被赌的假设：类型/对象形状稳定、调用点单态（→内联）、某分支从不走；Java 还有「没有子类覆盖此方法」(CHA)，后来加载了覆盖的子类 → deopt。</div>
+  <div class="caveat">V8（JS/Node）同理，只是分更多档：<b>Ignition</b>（解释器）→ <b>Sparkplug</b>（基线 JIT）→ <b>Maglev</b> → <b>TurboFan</b>（重度优化）。思路一致：先解释、数热度、热点逐级 JIT、假设破了就 deopt 退回解释器。</div>
+</div>
+
+</div><!-- /psec interp -->
+
+<div class="psec" data-p="compiler">
+<!-- 编译器通用结构 -->
+<div class="card">
+  <div class="lab">共用机器 ① · 编译器 = 前端 → IR → 后端</div>
+  <h3>所有编译器都是这三段，换的只是实现</h3>
+  <p class="sub2">前端只管读懂源语言，后端只管生成某个 CPU 的指令，中间靠 <b>IR（中间表示）</b> 解耦。字节码语言的 javac 也是编译器——只是它的"后端"停在字节码，真正的 codegen 推迟到运行期的 JIT。</p>
+  <div class="flow">
+    <div class="chip">源码</div><span class="ar">→</span>
+    <div class="chip">前端<small>词法 · 语法 · 语义 → AST</small></div><span class="ar">→</span>
+    <div class="chip ir">IR 中间表示<small>与语言/芯片都无关</small></div><span class="ar">→</span>
+    <div class="chip">后端<small>优化 · 寄存器分配 · codegen</small></div><span class="ar">→</span>
+    <div class="chip v">目标机器码<small>某个 ISA</small></div>
+  </div>
+  <div class="impl">
+    <div class="ic"><b>GCC</b>前端多语言 → GIMPLE/RTL（自家 IR）→ 多后端。老牌、全自带。</div>
+    <div class="ic"><b>Clang + LLVM</b>Clang 当前端 → <b>LLVM IR</b> → LLVM 后端。IR 可复用是它出圈的关键。</div>
+    <div class="ic"><b>rustc</b>Rust 前端 → <b>LLVM IR</b> → LLVM 后端（蹭 LLVM 的成熟后端）。</div>
+    <div class="ic"><b>Go (gc)</b>自研前端 → 自研 SSA IR → 自研后端，<b>不用 LLVM</b>，图快。</div>
+    <div class="ic"><b>javac / V8</b>前端 → <b>字节码</b>（停在中间的 IR），后端=运行期 JIT。</div>
+  </div>
+</div>
+
+</div><!-- /psec compiler -->
+
+<div class="psec" data-p="linker">
+<!-- 链接器 -->
+<div class="card">
+  <div class="lab">共用机器 ② · 链接器 = 把碎片拼成能跑的整体</div>
+  <h3>编译只产出一堆目标文件，链接器才拼成可执行</h3>
+  <p class="sub2">每个源文件单独编成目标文件 <code style="font-family:var(--mono)">.o</code>（含「我用了 printf 但不知道它在哪」的未决符号）。链接器把这些符号和库里的实现对上、合并成一个整体。</p>
+  <div class="two">
+    <div class="box st">
+      <h4>静态链接（编译期拼死）</h4>
+      <ul><li>库代码（<code style="font-family:var(--mono)">.a</code>）直接<b>拷进</b>可执行文件</li>
+        <li>自包含、换机器能跑；但大，每个程序各带一份</li>
+        <li>默认：Go、Rust（rlib）、musl 静态构建</li></ul>
+    </div>
+    <div class="box dy">
+      <h4>动态链接（运行期再拼）</h4>
+      <ul><li>只记「我要 libc.so」，代码留在共享库（<code style="font-family:var(--mono)">.so/.dll</code>）</li>
+        <li>多进程共享、可单独升级；但要环境里有那个库</li>
+        <li>默认：C/C++ 链 libc、系统共享库</li></ul>
+    </div>
+  </div>
+  <div class="caveat">VM 语言里，<b>运行时自己（java/python/node）</b>就是被这样链接出来的原生可执行文件——字节码/源码是它启动后再加载的数据，是另一回事。</div>
+</div>
+
+</div><!-- /psec linker -->
+
+<div class="psec" data-p="mem">
+<!-- 经典 x86 两进程地址翻译 -->
+<div class="card x86">
+  <div class="lab">机器码跑起来 · 经典 x86 地址翻译（两进程案例）</div>
+  <h3>两个进程、相同的虚拟地址，怎么落到不同的物理内存</h3>
+  <p class="sub2">机器码里写的是<b>虚拟地址</b>。经典 x86 保护模式走完整三段：逻辑地址 →(分段)→ 线性地址 →(分页)→ 物理地址。让两个进程用<b>相同的虚拟地址</b>，看它们各自落到不同物理页帧。</p>
+  <div class="procs">
+    <div class="proc2 a"><div class="ph">进程 A（浏览器）</div><code>mov eax, [0x08048000]</code><div class="va">读虚拟地址 <b>0x08048000</b></div></div>
+    <div class="proc2 b"><div class="ph">进程 B（编辑器）</div><code>mov eax, [0x08048000]</code><div class="va">读虚拟地址 <b>0x08048000</b></div></div>
+  </div>
+  <div class="samevaddr">↑ 两个进程用的是<span class="em">同一个虚拟地址</span>，彼此却互不干扰——秘密全在下面的翻译链</div>
+  <div class="stage"><div class="sn">① 逻辑地址<small>段选择子 : 偏移</small></div><div class="sd">CPU 拿到的是 <b>段选择子:偏移</b>（如 <code style="font-family:var(--mono)">CS:0x08048000</code>），段选择子指向描述符表某一项。</div></div>
+  <div class="stepar">↓</div>
+  <div class="stage seg2"><div class="sn">② 分段<small>GDT / LDT</small></div><div class="sd">段选择子查 <b>GDT</b>（全局，全系统共享）或 <b>LDT</b>（每进程一份）→ 取<b>段基址</b>。线性地址=段基址+偏移。<b>现代 64 位平坦模型段基址=0</b>，这步近乎透明。</div></div>
+  <div class="stepar">↓</div>
+  <div class="stage"><div class="sn">③ 线性地址<small>= 段基址 + 偏移</small></div><div class="sd">分段的产物。平坦模式下≈那个虚拟地址本身，交给分页硬件（MMU）。</div></div>
+  <div class="stepar">↓</div>
+  <div class="stage page"><div class="sn">④ 分页<small>CR3 → 页目录 → 页表</small></div><div class="sd"><b>这步才是两进程分道扬镳的地方。</b>每个进程有自己一套页表，根在 <b>CR3</b>。切进程时 OS 换 CR3，同一线性地址查到不同物理页帧：
+    <div class="forked" style="margin-top:8px"><div class="fk a">进程 A 的 <b>CR3</b> → A 的页表 → 物理页帧 <b>0x200000</b></div><div class="fk b">进程 B 的 <b>CR3</b> → B 的页表 → 物理页帧 <b>0x5A0000</b></div></div></div></div>
+  <div class="stepar">↓</div>
+  <div class="pmem"><div class="pt">⑤ 真实物理内存（RAM）</div>
+    <div class="ram"><div class="fr kern">内核<small>0x0–</small></div><div class="fr pa">进程A 代码<small>物理 0x200000</small></div><div class="fr free">空闲</div><div class="fr pb">进程B 代码<small>物理 0x5A0000</small></div><div class="fr free">空闲</div></div>
+    <div class="legend">同一虚拟地址 <b>0x08048000</b>，进程 A 落物理 <b>0x200000</b>、进程 B 落 <b>0x5A0000</b>——<span class="em">地址空间隔离</span>就这么来的。</div></div>
+  <div class="isobox">
+    <b>为什么一个进程读不到另一个进程的数据？</b>
+    每个进程都有<b>一整套属于自己的</b>虚拟地址空间（0 → 最高地址），它<b>「以为整台机器的内存都归它」</b>，根本不知道别的进程存在。它手里只有虚拟地址，而翻译用的页表（<b>CR3</b> 指向的那套）<b>只登记了它自己的页</b>——进程 A 想碰进程 B 的数据，它的地址空间里<b>压根没有通往那些物理页的映射</b>，连个有效地址都写不出来。
+    <div class="isohl">所以<b>进程隔离</b>不是「禁止读」，而是<b>压根够不着</b>：访问没映射的地址 → 触发缺页 → 段错误（SIGSEGV）。内核和共享库是例外——它们被映射进每个进程（同一份物理页），所以人人可用。进程间要通信得走专门渠道（管道 / 共享内存 / socket），由内核牵线。</div>
+  </div>
+  <div class="caveat"><b>关键寄存器：</b>CR0（开关保护/分页）、CR2（缺页时存出错的线性地址）、CR3（当前进程页表根=PDBR，切进程就换它）；CR1 保留。<br><b>现代简化：</b>64 位长模式用<b>平坦模型</b>，段基址≈0、分段近乎关掉，实际只剩「虚拟≈线性 →(分页)→ 物理」。<b>ARM 没有分段</b>，只有分页（根在 TTBR0/1）。翻译结果由 <b>TLB</b> 缓存。</div>
+</div>
+
+</div><!-- /psec mem -->
+</div><!-- /pcontent -->
+
+<footer>原型 · 每语言数据对象驱动（易接 Atlas） · 2026-11-08</footer>
+</div>
+</div>
+<script>(function(){
+
+const LANGS = [
+  {id:'C/C++', fam:'aot', tagline:'AOT 直出机器码；进程就是程序本身',
+   kind:'编译原生 (AOT)', gc:false, jit:false,
+   flow:['源码','编译器 前端→IR→后端','链接器','可执行文件'],
+   deliver:'可执行文件（程序的机器码）', proc:'程序本身', lives:'<b>.text</b> 机器码',
+   mem:[{k:'stack',b:'栈 Stack',s:'函数帧 · 局部变量'},
+        {k:'heap',b:'堆 Heap',s:'malloc/new 的对象'},
+        {k:'data',b:'数据段 .data/.bss',s:'全局/静态变量'},
+        {k:'text',b:'代码段 .text',s:'★ 程序的机器码（映射自可执行文件，只读）',mine:true}],
+   note:'进程 = 程序本身。编译期就生成机器码，可执行文件本身即机器码；无字节码、无解释器、无 VM。',
+   cmd:[['编译','gcc hello.c -o hello　/　g++ hello.cpp -o hello'],
+        ['运行','./hello'],
+        ['分步','gcc -c hello.c → hello.o　再　gcc hello.o -o hello（内部调 ld 链接）']]},
+  {id:'Go', fam:'aot', tagline:'AOT，但把运行时一起编进二进制',
+   kind:'编译原生 (AOT)', gc:true, jit:false,
+   flow:['源码','gc 编译器 自研SSA后端','链接器','可执行文件'],
+   deliver:'原生可执行文件（机器码，不是字节码）', proc:'程序本身', lives:'<b>.text</b> 机器码（含 Go 运行时）',
+   mem:[{k:'stack',b:'栈 Stack',s:'goroutine 栈（可伸缩）'},
+        {k:'heap',b:'堆 Heap',s:'对象（Go GC 管）'},
+        {k:'data',b:'数据段 .data/.bss',s:'全局变量'},
+        {k:'text',b:'代码段 .text',s:'★ 程序的机器码 + Go 运行时(GC/调度器) 一起编进来',mine:true}],
+   note:'进程 = 程序本身。<b>Go 编的是原生机器码，不是字节码、没有 VM</b>；「含运行时」是指 GC + goroutine 调度器这些也被编成机器码、当作库和程序代码链进同一个二进制（hello world 也 ~2MB）。默认静态链接，可绕 libc 直发系统调用。',
+   cmd:[['编译','go build hello.go　→　原生可执行 ./hello'],
+        ['运行','./hello　（或 go run hello.go 一步编译+运行）']]},
+  {id:'Rust', fam:'aot', tagline:'AOT，内存管理搬到编译期',
+   kind:'编译原生 (AOT)', gc:false, jit:false,
+   flow:['源码','rustc → LLVM IR → 机器码','链接器','可执行文件'],
+   deliver:'可执行文件（程序的机器码）', proc:'程序本身', lives:'<b>.text</b> 机器码',
+   mem:[{k:'stack',b:'栈 Stack',s:'函数帧 · 局部变量'},
+        {k:'heap',b:'堆 Heap',s:'Box/Vec 等（所有权管生命周期）'},
+        {k:'data',b:'数据段 .data/.bss',s:'全局/静态变量'},
+        {k:'text',b:'代码段 .text',s:'★ 程序的机器码（映射自可执行文件）',mine:true}],
+   note:'进程 = 程序本身。编的是原生机器码（走 LLVM），不是字节码、无 VM。没有 GC 也内存安全：所有权/借用在编译期证明，运行时不追踪内存。泛型单态化，零成本抽象。',
+   cmd:[['编译','rustc hello.rs　→　./hello　（工程用 cargo build）'],
+        ['运行','./hello']]},
+  {id:'Java', fam:'jitvm', tagline:'进程是 JVM，程序代码被加载进来',
+   kind:'字节码 · 解释 + JIT', gc:true, jit:true,
+   flow:['源码','javac → 字节码 .class','JVM：解释器 + C1/C2 JIT'],
+   deliver:'.class/.jar 字节码（躺在磁盘）', proc:'JVM（java，原生程序）', lives:'字节码→方法区·元空间；热点→Code Cache',
+   mem:[{k:'stack',b:'栈 Stack',s:'线程栈 · 栈帧'},
+        {k:'heap',b:'堆 Heap',s:'new 出的对象（GC 管）'},
+        {k:'cc',b:'Code Cache',s:'★ C1/C2 JIT 编出的热点机器码（JVM 管的本地内存）',mine:true},
+        {k:'method',b:'方法区 · 元空间',s:'★ 字节码 + 类元数据（从磁盘加载进来；JDK8+ 在本地内存）',mine:true},
+        {k:'text',b:'代码段 .text',s:'JVM 本体机器码（java 这个原生程序）',vmself:true}],
+   note:'进程是 JVM。程序的 .class 在磁盘，被类加载器读进方法区(元空间)当数据；解释器逐条执行，热点交 C1/C2 JIT 成机器码放 Code Cache。.text 里是 JVM 自己，不是程序代码。',
+   cmd:[['编译','javac Hello.java　→　Hello.class（字节码）'],
+        ['运行','java Hello　（启动 JVM，加载字节码执行）']]},
+  {id:'Python', fam:'interp', tagline:'进程是 CPython，纯解释无 JIT',
+   kind:'字节码 · 纯解释', gc:true, jit:false,
+   flow:['源码','编成字节码 .pyc','CPython 解释循环（switch dispatch）'],
+   deliver:'.py 源码（/.pyc）', proc:'CPython（python，原生程序）', lives:'字节码 + 对象都在<b>堆</b>（无 JIT）',
+   mem:[{k:'stack',b:'栈 Stack',s:'C 层调用栈'},
+        {k:'heap',b:'堆 Heap',s:'★ 字节码(code 对象) + 所有对象',mine:true},
+        {k:'data',b:'数据段 .data/.bss',s:'解释器全局状态'},
+        {k:'text',b:'代码段 .text',s:'CPython 解释器本体机器码',vmself:true}],
+   note:'进程是 CPython。字节码是堆上的 code 对象（数据），解释器用 switch 逐条分派到 C 函数执行，永不为程序代码生成机器码。经典无 JIT（3.13 起才有实验 JIT）。GIL 限制多核。',
+   cmd:[['运行','python hello.py　（CPython 自动编字节码 .pyc 并解释执行）'],
+        ['预编','python -m py_compile hello.py　→　__pycache__/hello.*.pyc']]},
+  {id:'JavaScript', fam:'jitvm', tagline:'进程是 node/V8，字节码+JIT 都在 V8 堆',
+   kind:'字节码 · 解释 + JIT', gc:true, jit:true,
+   flow:['源码','V8 Ignition → 字节码','解释 + Sparkplug/Maglev/TurboFan JIT'],
+   deliver:'.js 源码（躺在磁盘）', proc:'node / 浏览器（V8，原生程序）', lives:'字节码 + JIT 机器码都在 <b>V8 堆</b>',
+   mem:[{k:'stack',b:'栈 Stack',s:'C 层调用栈'},
+        {k:'heap',b:'堆 Heap（含 V8 code space）',s:'★ 字节码 + JIT 机器码 + 所有对象（V8 都放自己堆里）',mine:true},
+        {k:'data',b:'数据段 .data/.bss',s:'引擎全局状态'},
+        {k:'text',b:'代码段 .text',s:'node / V8 本体机器码',vmself:true}],
+   note:'进程是 node。程序的 .js 在磁盘，被 V8 读入→Ignition 编成字节码(堆)→解释执行→热点 JIT 成机器码(也在 V8 堆的 code space)；类型假设破了 deopt 退回字节码。.text 是 node/V8 自己。iOS 禁 JIT → 只能纯解释。',
+   cmd:[['运行','node app.js　（V8 内部编字节码、解释 + JIT）'],
+        ['浏览器','&lt;script src="app.js"&gt; 由浏览器内置 V8/JSCore 加载']]},
+  {id:'前端 · 浏览器', fam:'web', custom:'frontend'},
+];
+
+const tabsEl=document.getElementById('tabs'), panelEl=document.getElementById('panel');
+tabsEl.innerHTML = LANGS.map((l,i)=>`<button data-fam="${l.fam}" data-i="${i}">${l.id}</button>`).join('');
+
+function render(i){
+  const l=LANGS[i];
+  [...tabsEl.children].forEach((b,j)=>b.classList.toggle('on',j===i));
+  if(l.custom==='frontend'){
+    panelEl.innerHTML=`<div class="panel" style="grid-template-columns:1fr">
+      <div>
+        <h3>前端 · 浏览器</h3>
+        <p class="tagline">不是一种语言——HTML/CSS 是数据、JS 才是代码，全在浏览器(V8)里跑</p>
+        <div class="badges">
+          <span class="badge kind">HTML + CSS + JS</span>
+          <span class="badge yes">JS：字节码 + JIT</span>
+          <span class="badge no">HTML/CSS 不是代码</span>
+        </div>
+        <div class="three">
+          <div class="q"><div class="qt">交付什么</div><div class="qa">.html / .css / .js（Vue·React 构建期<b>编译成 JS</b>）</div></div>
+          <div class="q"><div class="qt">这个进程是谁</div><div class="qa"><b>浏览器</b>（Chrome / V8，原生 C++ 程序）</div></div>
+          <div class="q"><div class="qt">程序代码住哪</div><div class="qa">HTML→DOM、CSS→CSSOM（数据）；JS→V8 堆 + code cache</div></div>
+        </div>
+        <div class="plabel">浏览器渲染管线</div>
+        <div class="webpipe">
+          <div class="wlane"><span class="wtag html">HTML</span><span class="ar">→</span><span class="chip">解析</span><span class="ar">→</span><span class="chip">DOM 树</span></div>
+          <div class="wlane"><span class="wtag css">CSS</span><span class="ar">→</span><span class="chip">解析</span><span class="ar">→</span><span class="chip">CSSOM</span></div>
+          <div class="wlane"><span class="wtag js">JS</span><span class="ar">→</span><span class="chip ir">V8 执行<small>字节码+解释+JIT</small></span><span class="wmod">← 可随时改 DOM/CSSOM</span></div>
+          <div class="wconv">三者汇合 ↓</div>
+          <div class="flow" style="justify-content:flex-start;gap:6px">
+            <span class="chip">样式计算</span><span class="ar">→</span>
+            <span class="chip">布局 layout</span><span class="ar">→</span>
+            <span class="chip">绘制 paint</span><span class="ar">→</span>
+            <span class="chip">合成 composite</span><span class="ar">→</span>
+            <span class="chip v">GPU</span><span class="ar">→</span>
+            <span class="chip k">显示器 (IO)</span>
+          </div>
+        </div>
+        <div class="pnote"><b>要点：</b>① HTML/CSS 是<b>声明式数据</b>，被「解析」成 DOM/CSSOM，不是「执行」；② 只有 <b>JS 被执行</b>（V8：字节码+解释+JIT），可随时改 DOM/CSSOM 触发重排/重绘；③ <b>Vue/React 构建期编译成 JS</b>，运行时还是 V8 跑；④ 进程就是<b>浏览器</b>——CPU/GPU 算像素、OS+GPU 把帧推到显示器，输出又回到浏览器这个进程。</div>
+      </div>
+    </div>`;
+    return;
+  }
+  const mem = l.mem.map(r=>`<div class="seg ${r.k} ${r.mine?'mine':''} ${r.vmself?'vmself':''}"><b>${r.b}</b><span>${r.s}</span></div>`).join('');
+  const aot=l.fam==='aot';
+  panelEl.innerHTML=`<div class="panel">
+    <div>
+      <h3>${l.id}</h3><p class="tagline">${l.tagline}</p>
+      <div class="badges">
+        <span class="badge kind">${l.kind}</span>
+        <span class="badge ${l.gc?'yes':'no'}">${l.gc?'有 GC':'无 GC'}</span>
+        <span class="badge ${l.jit?'yes':'no'}">${l.jit?'有 JIT':'无 JIT'}</span>
+      </div>
+      <div class="three">
+        <div class="q"><div class="qt">交付什么</div><div class="qa">${l.deliver}</div></div>
+        <div class="q"><div class="qt">这个进程是谁</div><div class="qa"><b>${l.proc}</b></div></div>
+        <div class="q"><div class="qt">程序代码住哪</div><div class="qa">${l.lives}</div></div>
+      </div>
+      <div class="plabel">源码怎么变成机器码</div>
+      <div class="pflow">${l.flow.map((s,k)=>`<div class="chip">${s}</div>`+(k<l.flow.length-1?'<span class="ar">→</span>':'')).join('')}</div>
+      <div class="pnote">${l.note}</div>
+      ${l.cmd?`<div class="plabel">实际命令</div><div class="cmds">${l.cmd.map(c=>`<div class="cmdrow"><span class="cl">${c[0]}</span><code>${c[1]}</code></div>`).join('')}</div>`:''}
+    </div>
+    <div class="mem">
+      <div class="proc">这个进程是 <b>${l.proc}</b></div>
+      <div class="ends">高地址</div>
+      ${mem}
+      <div class="ends">低地址</div>
+      <div class="memkey">${aot?'<b>★</b> 程序代码<b>就是</b>这个进程（.text 即程序的机器码）':'<b>★</b> 程序代码是被 VM <b>加载进来的数据</b>；.text 里是 VM 自己'}</div>
+    </div>
+  </div>`;
+}
+tabsEl.addEventListener('click',e=>{const b=e.target.closest('button');if(b)render(+b.dataset.i);});
+render(0);
+
+// 原理 tabs（解释器 / 编译器 / 链接器 / 进程地址空间）
+const ptabsEl=document.getElementById('ptabs');
+const psecs=[...document.querySelectorAll('#pcontent .psec')];
+function showP(p){
+  [...ptabsEl.children].forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  psecs.forEach(s=>s.classList.toggle('on',s.dataset.p===p));
+}
+ptabsEl.addEventListener('click',e=>{const b=e.target.closest('button');if(b)showP(b.dataset.p);});
+showP('interp');
+
+})();</script>
+
+<style>
+/* AI 工程栈：框架 → 编译器 → 加速芯片（AI 界独立的一层新基础设施，自上而下） */
+.aistack{max-width:860px;margin:30px auto 0;padding:34px 20px 10px;border-top:1px solid #e0d5bf}
+.aistack .eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.16em;color:#8a5a33;text-transform:uppercase;text-align:center}
+.aistack h2{font-family:"Songti SC","Noto Serif SC",Georgia,serif;font-size:clamp(20px,3vw,28px);text-align:center;margin:8px 0 6px;color:#2a2f3a}
+.aistack .intro{text-align:center;color:#5f6b7a;font-size:13.5px;line-height:1.6;max-width:62ch;margin:0 auto 20px}
+.aistack .stack{display:flex;flex-direction:column;align-items:center;gap:0}
+.aistack .tier{width:100%;max-width:720px;border:2px solid #d8d2c4;border-radius:14px;padding:13px 16px;background:#fff;box-shadow:0 3px 12px rgba(80,60,30,.08)}
+.aistack .tier.l1{border-color:#3f8f52;background:#f3fbf4}
+.aistack .tier.l2{border-color:#7a52a0;background:#f5eff9}
+.aistack .tier.l3{border-color:#9c7b52;background:#fbf7ef}
+.aistack .tier.l0{border-color:#c88a3f;background:#fdf6ec}
+.aistack .tier.ldev{border-color:#2f6cb0;background:#f4f8fe}
+.aistack .tl{display:flex;align-items:baseline;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.aistack .tl b{font-family:"Songti SC","Noto Serif SC",Georgia,serif;font-size:16px}
+.aistack .tl small{font-size:11px;color:#5f6b7a}
+.aistack .tier.l1 .tl b{color:#357a46}.aistack .tier.l2 .tl b{color:#6a4596}.aistack .tier.l3 .tl b{color:#8a5a33}
+.aistack .tier.l0 .tl b{color:#a66a28}.aistack .tier.ldev .tl b{color:#2a5f9e}
+.aistack .items{display:flex;flex-wrap:wrap;gap:8px}
+.aistack .si{flex:1 1 130px;min-width:118px;border:1px solid #e2dccb;border-radius:9px;background:#fff;padding:7px 10px;text-align:center}
+.aistack .si b{font-size:13px;color:#2a2f3a;display:block}
+.aistack .si small{font-size:10px;color:#5f6b7a;display:block;margin-top:1px;line-height:1.3}
+.aistack .tnote{font-size:11px;color:#5f6b7a;margin-top:9px;line-height:1.55;border-top:1px dashed #e0d5bf;padding-top:7px}
+.aistack .tnote b{color:#2a2f3a}
+.aistack .down{font-size:13px;font-weight:800;color:#8a5a33;padding:8px 0;line-height:1}
+.aistack .foot{text-align:center;color:#9aa6b4;font-size:11.5px;margin-top:16px}
+</style>
+<div class="xdiv"><i>AI 系统分层 · 从应用到芯片</i></div>
+<section class="aistack">
+  <div class="eyebrow">AI SYSTEM STACK</div>
+  <h2>AI 系统分层：从应用到芯片</h2>
+  <p class="intro">AI 系统的完整分层（对应《AI 系统：原理与架构》表 1.3.1）——从「用 AI 解决什么」一路落到硅片。自上而下五层：<b>领域应用 → 开发体系 → 框架 → 编译器 → 芯片</b>。</p>
+  <div class="stack">
+    <div class="tier l0">
+      <div class="tl"><b>① 领域算法应用</b><small>用 AI 解决什么</small></div>
+      <div class="items">
+        <div class="si"><b>CV 视觉</b><small>CNN · ViT · 检测/分割</small></div>
+        <div class="si"><b>NLP 语言</b><small>Transformer · LLM</small></div>
+        <div class="si"><b>音频 / 多模态</b><small>ASR · 语音 · 图文</small></div>
+        <div class="si"><b>生成 / 决策</b><small>GAN · Diffusion · 强化学习</small></div>
+      </div>
+      <div class="tnote">代表模型 CNN / RNN·LSTM / Transformer / GAN·Diffusion / RL——即右树「<b>人工智能之树</b>」的模型谱系，这里换个视角、只列它们落地的<b>领域</b>。</div>
+    </div>
+    <div class="down">▼ 用什么写</div>
+    <div class="tier ldev">
+      <div class="tl"><b>② 开发体系</b><small>编程语言 + 工具</small></div>
+      <div class="items">
+        <div class="si"><b>Python</b><small>AI 主语言 · 粘合层</small></div>
+        <div class="si"><b>Jupyter</b><small>交互式实验</small></div>
+        <div class="si"><b>VS Code</b><small>IDE</small></div>
+        <div class="si"><b>PyCharm</b><small>IDE</small></div>
+      </div>
+      <div class="tnote">框架都以 <b>Python</b> 为主接口（PyTorch/TF 与 Python 集成）；性能内核仍是 C/C++/CUDA。Python 本身属左树「<b>高级语言生态</b>」。</div>
+    </div>
+    <div class="down">▼ 用什么算</div>
+    <div class="tier l1">
+      <div class="tl"><b>③ 框架 / 引擎</b><small>自动微分 · 训练框架 + 推理引擎</small></div>
+      <div class="items">
+        <div class="si"><b>PyTorch</b><small>Meta · 动态图 · 主流</small></div>
+        <div class="si"><b>TensorFlow</b><small>Google · 早期静态图</small></div>
+        <div class="si"><b>JAX</b><small>Google · 函数式 · 靠 XLA</small></div>
+        <div class="si"><b>MindSpore</b><small>华为 · 配昇腾 NPU</small></div>
+      </div>
+      <div class="tnote"><b>训练框架</b>核心＝<b>自动微分</b>：写好前向、框架自动反向求梯度（损失自己写、框架求其梯度）；分<b>前向模式</b>（输入维度少时划算）与<b>反向模式</b>（输出少、参数多时划算，深度学习用它）。省显存靠缓存分配器 + 梯度检查点（重算换显存）。</div>
+      <div class="tnote"><b>分布式并行</b>（单卡放不下就切开，大模型训练的命根子）：<b>数据并行</b>（切 batch）· <b>张量并行</b>（切单层权重）· <b>流水并行</b>（按层切到多卡）· <b>混合并行</b>（三者组合）。</div>
+      <div class="tnote"><b>推理引擎</b>（部署端，不走训练框架）：vLLM · TensorRT-LLM · SGLang · llama.cpp——PagedAttention / KV Cache / 连续批处理；配<b>模型轻量化</b>：<b>量化</b>(低比特) · <b>剪枝</b>(去冗余权重) · <b>蒸馏</b>(大模型教小模型)。对应主树节点「<b>模型部署与推理</b>」。</div>
+    </div>
+    <div class="down">▼ 编译 · 下沉算子图</div>
+    <div class="tier l2">
+      <div class="tl"><b>④ 编译器</b><small>算子图 → 硬件指令</small></div>
+      <div class="items">
+        <div class="si"><b>CUDA</b><small>nvcc → PTX → GPU 机器码</small></div>
+        <div class="si"><b>XLA</b><small>TF/JAX 算子融合 → GPU/TPU</small></div>
+        <div class="si"><b>TVM</b><small>开源 · 自动调优 · 多后端</small></div>
+        <div class="si"><b>CANN</b><small>华为昇腾 · 对标 CUDA</small></div>
+      </div>
+      <div class="tnote"><b>AI 编译器的优化</b>：<b>算子融合</b>（多算子合一、少读写显存）· <b>图优化</b>（常量折叠 / 消冗余）· <b>Auto-Tuning</b>（自动搜最快实现）——这是 AI 编译器比"直接调库"更快的原因。</div>
+      <div class="tnote">后端<b>大量复用 LLVM</b>（CUDA/XLA 底层、MLIR 即 LLVM 项目）——这正是「AI 时代仍离不开传统编译基础设施」、编译器成为连接两棵树<b>第三座桥</b>的原因。另有 Triton / TensorRT / ROCm。</div>
+      <div class="tnote"><b>底层通信</b>（多卡/多机训练的通信底座）：<b>NCCL</b>(英伟达) / <b>HCCL</b>(昇腾) · 集合通信 AllReduce 等——<b>分布式并行</b>靠它在卡间同步梯度/权重。</div>
+    </div>
+    <div class="down">▼ 生成机器码 · 执行</div>
+    <div class="tier l3">
+      <div class="tl"><b>⑤ 加速芯片</b><small>大规模并行算力</small></div>
+      <div class="items">
+        <div class="si"><b>GPU</b><small>通用并行 · 生态最全</small></div>
+        <div class="si"><b>NPU</b><small>昇腾/端侧 · 神经网络专用</small></div>
+        <div class="si"><b>TPU</b><small>Google · 张量 ASIC</small></div>
+      </div>
+      <div class="tnote">对应主树地基的<b>算力谱系</b>：CPU → GPU → FPGA → ASIC（TPU/NPU），灵活性↓、效率↑。</div>
+    </div>
+  </div>
+  <div class="foot">领域应用 → 开发体系 → 框架 → 编译器 → 芯片：AI 系统从「用什么解决问题」一路落到「跑在硅片上」的完整分层。</div>
+</section>
+<footer>双树同根 · 内容对应 Atlas 个人知识库 · 2026-11-05 · 11-07 增补讲解卡与 AI 史分支</footer>
